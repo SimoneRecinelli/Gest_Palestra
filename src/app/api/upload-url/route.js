@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth'; 
 
+// Diciamo a Next.js di NON eseguire questo file durante la build, ma solo a runtime
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
@@ -12,7 +15,7 @@ export async function POST(request) {
 
     const { filename } = await request.json();
     const uniqueFilename = `${Date.now()}-${filename.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
+    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || 'video-esercizi';
 
     const { data, error } = await supabase
       .storage
@@ -21,7 +24,7 @@ export async function POST(request) {
 
     if (error) throw error;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
     const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${uniqueFilename}`;
 
     return NextResponse.json({ 
