@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth'; 
+import { authOptions } from '@/lib/auth';
 
-// Diciamo a Next.js di NON eseguire questo file durante la build, ma solo a runtime
+// Non eseguire questa rotta durante la build: le variabili Supabase
+// esistono solo a runtime su Vercel, e senza questa riga il build fallisce.
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
@@ -15,21 +16,20 @@ export async function POST(request) {
 
     const { filename } = await request.json();
     const uniqueFilename = `${Date.now()}-${filename.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || 'video-esercizi';
+    const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET;
 
-    const { data, error } = await supabase
-      .storage
+    const { data, error } = await supabase.storage
       .from(bucketName)
       .createSignedUploadUrl(uniqueFilename);
 
     if (error) throw error;
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${uniqueFilename}`;
 
-    return NextResponse.json({ 
-      uploadUrl: data.signedUrl, 
-      videoUrl: publicUrl 
+    return NextResponse.json({
+      uploadUrl: data.signedUrl,
+      videoUrl: publicUrl,
     });
   } catch (error) {
     console.error('Errore upload Supabase:', error);

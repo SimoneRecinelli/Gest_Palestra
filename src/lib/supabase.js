@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = process.env.SUPABASE_SECRET_KEY || 'placeholder-key'; 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Usa la chiave segreta: serve solo lato server per generare URL di upload firmati.
+export const supabase = createClient(supabaseUrl, supabaseSecretKey);

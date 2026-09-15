@@ -1,47 +1,145 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Plus } from 'lucide-react';
 
 export default function EsercizioCard({ esercizio, isAtleta }) {
   const [nota, setNota] = useState(esercizio.nota_atleta || '');
-  const [salvataggio, setSalvataggio] = useState(false);
+  const [salvataggioNota, setSalvataggioNota] = useState(false);
+  const [peso, setPeso] = useState('');
+  const [ripetizioniFatte, setRipetizioniFatte] = useState('');
+  const [registrando, setRegistrando] = useState(false);
+  const router = useRouter();
 
   async function salvaNota() {
-    setSalvataggio(true);
+    setSalvataggioNota(true);
     await fetch('/api/note', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ esercizioId: esercizio.id, testo: nota }),
     });
-    setSalvataggio(false);
+    setSalvataggioNota(false);
+  }
+
+  async function registraSerie(e) {
+    e.preventDefault();
+    if (!peso && !ripetizioniFatte) return;
+    setRegistrando(true);
+    await fetch('/api/pesi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ esercizioId: esercizio.id, pesoKg: peso, ripetizioniFatte }),
+    });
+    setPeso('');
+    setRipetizioniFatte('');
+    setRegistrando(false);
+    router.refresh();
   }
 
   return (
-    <div style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16, marginBottom: 12 }}>
-      <h3 style={{ margin: '0 0 8px' }}>{esercizio.nome}</h3>
-      <p style={{ margin: '0 0 8px', color: '#555' }}>
-        Serie: {esercizio.serie ?? '-'} · Ripetizioni: {esercizio.ripetizioni ?? '-'} · Recupero:{' '}
-        {esercizio.recupero ?? '-'}
-      </p>
+    <div className="bg-card border border-border border-l-4 border-l-accent rounded-lg p-5 mb-4">
+      <h3 className="font-display font-semibold text-xl mb-3">{esercizio.nome}</h3>
+
+      {/* Tabellone: serie / ripetizioni / recupero */}
+      <div className="grid grid-cols-3 divide-x divide-border border border-border rounded bg-white/60 mb-3">
+        <div className="text-center py-2">
+          <p className="font-display font-semibold text-lg leading-none">{esercizio.serie ?? '—'}</p>
+          <p className="text-xs text-inkmuted mt-1">serie</p>
+        </div>
+        <div className="text-center py-2">
+          <p className="font-display font-semibold text-lg leading-none">{esercizio.ripetizioni ?? '—'}</p>
+          <p className="text-xs text-inkmuted mt-1">ripetizioni</p>
+        </div>
+        <div className="text-center py-2">
+          <p className="font-display font-semibold text-lg leading-none">{esercizio.recupero ?? '—'}</p>
+          <p className="text-xs text-inkmuted mt-1">recupero</p>
+        </div>
+      </div>
+
       {esercizio.note_pt && (
-        <p style={{ fontStyle: 'italic', margin: '0 0 8px' }}>Nota del PT: {esercizio.note_pt}</p>
+        <p className="text-sm italic text-inkmuted border-l-2 border-border pl-3 mb-3">
+          {esercizio.note_pt}
+        </p>
       )}
-      {esercizio.video_url && (
-        <video controls width="100%" style={{ maxWidth: 400, borderRadius: 8, display: 'block' }}>
+
+      {esercizio.video_url ? (
+        <video controls className="w-full max-w-sm rounded mb-4 bg-black">
           <source src={esercizio.video_url} />
           Il tuo browser non supporta la riproduzione video.
         </video>
+      ) : (
+        <p className="text-sm text-inkmuted mb-4">Nessun video caricato per questo esercizio.</p>
       )}
+
+      {/* Diario pesi */}
+      <div className="border-t border-border pt-3">
+        <p className="text-sm font-medium text-inkmuted mb-2">Diario pesi</p>
+        {esercizio.pesi && esercizio.pesi.length > 0 ? (
+          <ul className="space-y-1 mb-3">
+            {esercizio.pesi.map((p, i) => (
+              <li
+                key={p.id}
+                className={`flex items-baseline justify-between text-sm ${i === 0 ? 'riga-nuova' : ''}`}
+              >
+                <span>
+                  <span className="font-display font-semibold">{p.peso_kg ?? '—'} kg</span>
+                  {p.ripetizioni_fatte && <span className="text-inkmuted"> × {p.ripetizioni_fatte}</span>}
+                </span>
+                <span className="text-xs text-inkmuted">
+                  {new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-inkmuted mb-3">Ancora nessuna serie registrata.</p>
+        )}
+
+        {isAtleta && (
+          <form onSubmit={registraSerie} className="flex gap-2">
+            <input
+              type="number"
+              step="0.5"
+              placeholder="kg"
+              value={peso}
+              onChange={(e) => setPeso(e.target.value)}
+              className="w-20 px-2 py-1.5 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+            <input
+              type="text"
+              placeholder="ripetizioni"
+              value={ripetizioniFatte}
+              onChange={(e) => setRipetizioniFatte(e.target.value)}
+              className="w-24 px-2 py-1.5 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+            <button
+              type="submit"
+              disabled={registrando}
+              className="flex items-center gap-1 bg-accent hover:bg-accentdark text-white text-sm font-medium px-3 py-1.5 rounded transition-colors disabled:opacity-60"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Registra
+            </button>
+          </form>
+        )}
+      </div>
+
       {isAtleta && (
-        <div style={{ marginTop: 8 }}>
+        <div className="border-t border-border pt-3 mt-3">
+          <p className="text-sm font-medium text-inkmuted mb-2">Le tue note</p>
           <textarea
             value={nota}
             onChange={(e) => setNota(e.target.value)}
-            placeholder="Le tue note personali..."
+            placeholder="Sensazioni, aggiustamenti, promemoria..."
             rows={2}
-            style={{ width: '100%', padding: 6 }}
+            className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
           />
-          <button onClick={salvaNota} disabled={salvataggio} style={{ marginTop: 4 }}>
-            {salvataggio ? 'Salvataggio...' : 'Salva nota'}
+          <button
+            onClick={salvaNota}
+            disabled={salvataggioNota}
+            className="mt-2 text-sm text-accent hover:text-accentdark font-medium disabled:opacity-60"
+          >
+            {salvataggioNota ? 'Salvataggio...' : 'Salva nota'}
           </button>
         </div>
       )}

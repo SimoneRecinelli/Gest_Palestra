@@ -2,9 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { redirect, notFound } from 'next/navigation';
-import EsercizioCard from './EsercizioCard';
-import NuovoEsercizioForm from './NuovoEsercizioForm';
-import NuovoGiornoForm from './NuovoGiornoForm';
+import SchedaTabs from './SchedaTabs';
 
 export default async function SchedaPage({ params }) {
   const session = await getServerSession(authOptions);
@@ -37,19 +35,23 @@ export default async function SchedaPage({ params }) {
     })
   );
 
+  // Diario pesi: una query sola per tutti gli esercizi della scheda, poi raggruppo per esercizio.
+  const tuttiGliEsercizi = giorniConEsercizi.flatMap((g) => g.esercizi);
+  if (tuttiGliEsercizi.length > 0) {
+    const idEsercizi = tuttiGliEsercizi.map((e) => e.id);
+    const { rows: pesi } = await query(
+      `SELECT * FROM log_pesi WHERE esercizio_id = ANY($1::int[]) AND atleta_id = $2 ORDER BY creato_il DESC`,
+      [idEsercizi, scheda.atleta_id]
+    );
+    for (const esercizio of tuttiGliEsercizi) {
+      esercizio.pesi = pesi.filter((p) => p.esercizio_id === esercizio.id).slice(0, 5);
+    }
+  }
+
   return (
-    <div style={{ padding: 24, fontFamily: 'sans-serif', maxWidth: 700, margin: '0 auto' }}>
-      <h1>{scheda.titolo}</h1>
-      {giorniConEsercizi.map((giorno) => (
-        <div key={giorno.id} style={{ marginBottom: 32 }}>
-          <h2>{giorno.nome}</h2>
-          {giorno.esercizi.map((es) => (
-            <EsercizioCard key={es.id} esercizio={es} isAtleta={isAtleta} />
-          ))}
-          {isPt && <NuovoEsercizioForm giornoId={giorno.id} />}
-        </div>
-      ))}
-      {isPt && <NuovoGiornoForm schedaId={scheda.id} />}
+    <div className="max-w-2xl mx-auto px-6 py-10">
+      <h1 className="font-display font-semibold text-2xl mb-6">{scheda.titolo}</h1>
+      <SchedaTabs giorni={giorniConEsercizi} isPt={isPt} isAtleta={isAtleta} schedaId={scheda.id} />
     </div>
   );
 }

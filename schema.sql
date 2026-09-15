@@ -1,4 +1,6 @@
--- Schema del database: da eseguire una sola volta nell'SQL Editor di Neon
+-- Schema completo del database (per un'installazione da zero).
+-- Se hai già eseguito una versione precedente di questo schema,
+-- usa invece migrazione-pesi.sql per aggiungere solo la parte nuova.
 
 CREATE TYPE ruolo_utente AS ENUM ('pt', 'atleta');
 
@@ -48,4 +50,16 @@ CREATE TABLE note_atleta (
   testo TEXT,
   aggiornata_il TIMESTAMPTZ DEFAULT now(),
   UNIQUE(esercizio_id, atleta_id)
+);
+
+-- Diario pesi: ogni riga è una serie registrata dall'atleta durante
+-- un allenamento. Più righe nello stesso giorno = più serie di quell'esercizio.
+CREATE TABLE log_pesi (
+  id SERIAL PRIMARY KEY,
+  esercizio_id INTEGER NOT NULL REFERENCES esercizi(id) ON DELETE CASCADE,
+  atleta_id INTEGER NOT NULL REFERENCES utenti(id),
+  data DATE NOT NULL DEFAULT CURRENT_DATE,
+  peso_kg NUMERIC,
+  ripetizioni_fatte TEXT,
+  creato_il TIMESTAMPTZ DEFAULT now()
 );
