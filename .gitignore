@@ -1,0 +1,11 @@
+# Dipendenze
+node_modules/
+
+# Variabili d'ambiente (non devono MAI finire su GitHub)
+.env*
+!.env.example
+
+# File generati da Next.js
+.next/
+out/
+build/
