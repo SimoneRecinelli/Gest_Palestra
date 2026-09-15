@@ -1,38 +1,27 @@
+'use client';
+
 import { Oswald, Inter } from 'next/font/google';
 import SessionWrapper from './SessionWrapper';
 import './globals.css';
 
-const oswald = Oswald({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-oswald',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-inter',
-});
-
-export const metadata = {
-  title: 'Diario Allenamento',
-};
+// Nota: quando si usa 'use client' in un layout radice, 
+// le proprietà dei font di google a volte vanno gestite o importate nel CSS, 
+// ma teniamo i font e sistemiamo l'interazione del bottone.
 
 export default function RootLayout({ children }) {
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', { method: 'POST' });
     } catch (e) {
-      // Ignora eventuali errori di rete
+      // Ignora errori di rete
     }
     window.location.href = '/login';
   };
 
   return (
     <html lang="it">
-      <body className={`${oswald.variable} ${inter.variable} font-body bg-paper text-ink min-h-screen flex flex-col`}>
+      <body className="font-sans bg-[#f5f2eb] text-[#1c1917] min-h-screen flex flex-col antialiased">
         <SessionWrapper>
-          {/* Navbar integrata direttamente qui */}
           <header className="w-full bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center space-x-3">
               <span className="text-xl font-bold tracking-tight text-stone-900 font-['Oswald']">
