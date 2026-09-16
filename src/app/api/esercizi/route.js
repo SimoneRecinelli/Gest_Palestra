@@ -37,7 +37,7 @@ export async function POST(request) {
       data.nome || 'Nuovo Esercizio',  // Inserisce questo se il campo è vuoto
       data.serie || 3,
       data.ripetizioni || '10',
-      data.recupero || '1''',
+      data.recupero || "1'",
       data.notePt || null,
       data.videoUrl || null,
       maxOrdine[0].max + 1,
