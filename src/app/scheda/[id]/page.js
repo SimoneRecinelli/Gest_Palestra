@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
 import { redirect, notFound } from 'next/navigation';
 import SchedaTabs from './SchedaTabs';
+import Link from 'next/link';
 
 export default async function SchedaPage({ params }) {
   const session = await getServerSession(authOptions);
@@ -48,9 +49,19 @@ export default async function SchedaPage({ params }) {
     }
   }
 
-  return (
+return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      <h1 className="font-display font-semibold text-2xl mb-6">{scheda.titolo}</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="font-display font-semibold text-2xl">{scheda.titolo}</h1>
+        {isPt && (
+          <Link
+            href={`/scheda/${scheda.id}/modifica`}
+            className="bg-stone-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-stone-800 transition-colors"
+          >
+            Modifica Scheda
+          </Link>
+        )}
+      </div>
       <SchedaTabs giorni={giorniConEsercizi} isPt={isPt} isAtleta={isAtleta} schedaId={scheda.id} />
     </div>
   );

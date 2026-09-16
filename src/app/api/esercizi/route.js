@@ -9,10 +9,11 @@ export async function POST(request) {
     return NextResponse.json({ errore: 'Non autorizzato' }, { status: 403 });
   }
 
-  const { giornoId, nome, serie, ripetizioni, recupero, notePt, videoUrl } =
-    await request.json();
+  const data = await request.json();
+  // Il frontend ora manda 'giorno_id', quindi lo peschiamo in modo flessibile
+  const giornoId = data.giornoId || data.giorno_id; 
 
-  // Verifica che il giorno appartenga a una scheda di questo PT
+  // Verifica che il giorno appartenga a una scheda di questo PT (Ottima sicurezza!)
   const { rows: giornoRows } = await query(
     `SELECT g.id FROM giorni g
      JOIN schede s ON s.id = g.scheda_id
@@ -33,12 +34,12 @@ export async function POST(request) {
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
     [
       giornoId,
-      nome,
-      serie || null,
-      ripetizioni || null,
-      recupero || null,
-      notePt || null,
-      videoUrl || null,
+      data.nome || 'Nuovo Esercizio',  // Inserisce questo se il campo è vuoto
+      data.serie || 3,
+      data.ripetizioni || '10',
+      data.recupero || '1''',
+      data.notePt || null,
+      data.videoUrl || null,
       maxOrdine[0].max + 1,
     ]
   );
