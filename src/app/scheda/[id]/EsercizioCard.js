@@ -36,6 +36,15 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
     router.refresh();
   }
 
+  // Funzione per tradurre i link YouTube normali e Shorts in link da incorporare (embed)
+  const getEmbedUrl = (url) => {
+    if (!url) return null;
+    if (url.includes('/shorts/')) return url.replace('/shorts/', '/embed/');
+    if (url.includes('youtu.be/')) return url.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0];
+    if (url.includes('watch?v=')) return url.replace('watch?v=', 'embed/').split('&')[0];
+    return url;
+  };
+
   return (
     <div className="bg-card border border-border border-l-4 border-l-accent rounded-lg p-5 mb-4">
       <h3 className="font-display font-semibold text-xl mb-3">{esercizio.nome}</h3>
@@ -56,17 +65,33 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
         </div>
       </div>
 
+      {/* Note del PT per l'Atleta */}
       {esercizio.note_pt && (
         <p className="text-sm italic text-inkmuted border-l-2 border-border pl-3 mb-3">
           {esercizio.note_pt}
         </p>
       )}
 
+      {/* Note dell'Atleta visibili al PT */}
+      {esercizio.nota_atleta && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <span className="block text-xs font-bold text-yellow-800 uppercase tracking-wider mb-1">
+            📝 Nota di Simone:
+          </span>
+          <p className="text-sm text-yellow-900">{esercizio.nota_atleta}</p>
+        </div>
+      )}
+
+      {/* Video YouTube con iframe al posto di <video> */}
       {esercizio.video_url ? (
-        <video controls className="w-full max-w-sm rounded mb-4 bg-black">
-          <source src={esercizio.video_url} />
-          Il tuo browser non supporta la riproduzione video.
-        </video>
+        <div className="w-full max-w-sm mb-4">
+          <iframe 
+            src={getEmbedUrl(esercizio.video_url)} 
+            className="w-full aspect-video rounded bg-black"
+            allowFullScreen
+            title={`Video ${esercizio.nome}`}
+          ></iframe>
+        </div>
       ) : (
         <p className="text-sm text-inkmuted mb-4">Nessun video caricato per questo esercizio.</p>
       )}

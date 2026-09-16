@@ -5,6 +5,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import ModificaEsercizio from './ModificaEsercizio';
 import AggiungiEsercizio from './AggiungiEsercizio';
+import RimuoviGiorno from './RimuoviGiorno';
 
 export default async function ModificaSchedaPage({ params }) {
   const session = await getServerSession(authOptions);
@@ -39,7 +40,10 @@ export default async function ModificaSchedaPage({ params }) {
 
       {giorniConEsercizi.map((giorno) => (
         <div key={giorno.id} className="mb-10">
-          <h2 className="text-xl font-bold border-b border-stone-200 pb-2 mb-4">{giorno.nome}</h2>
+          <div className="flex justify-between items-center border-b border-stone-200 pb-2 mb-4">
+            <h2 className="text-xl font-bold">{giorno.nome}</h2>
+            <RimuoviGiorno giornoId={giorno.id} nomeGiorno={giorno.nome} />
+          </div>
           {giorno.esercizi.map((esercizio) => (
             <ModificaEsercizio key={esercizio.id} esercizio={esercizio} />
           ))}
