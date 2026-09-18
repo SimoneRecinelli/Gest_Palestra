@@ -1,7 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { Plus, Timer } from 'lucide-react';
+import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
 
 export default function EsercizioCard({ esercizio, isAtleta }) {
   const [nota, setNota] = useState(esercizio.nota_atleta || '');
@@ -9,7 +10,41 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
   const [peso, setPeso] = useState('');
   const [ripetizioniFatte, setRipetizioniFatte] = useState('');
   const [registrando, setRegistrando] = useState(false);
+  
+  // Stati per il Timer
+  const [timer, setTimer] = useState(0);
+  const [timerAttivo, setTimerAttivo] = useState(false);
   const router = useRouter();
+
+  // Logica Timer
+  useEffect(() => {
+    let interval = null;
+    if (timerAttivo && timer > 0) {
+      interval = setInterval(() => setTimer((t) => t - 1), 1000);
+    } else if (timer === 0 && timerAttivo) {
+      setTimerAttivo(false);
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timerAttivo, timer]);
+
+  const formatTime = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const calcolaSecondiRecupero = (testo) => {
+    if (!testo) return 90; // Default 90s
+    const t = testo.toLowerCase();
+    if (t.includes("'")) {
+      const parti = t.split("'");
+      const min = parseInt(parti[0]) || 0;
+      const sec = parseInt(parti[1]) || 0;
+      return min * 60 + sec;
+    }
+    return parseInt(t) || 90;
+  };
 
   async function salvaNota() {
     setSalvataggioNota(true);
@@ -33,26 +68,40 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
     setPeso('');
     setRipetizioniFatte('');
     setRegistrando(false);
+    
+    // Avvia il timer in automatico leggendo il recupero settato dal PT
+    setTimer(calcolaSecondiRecupero(esercizio.recupero));
+    setTimerAttivo(true);
     router.refresh();
   }
 
-  // Funzione aggiornata per garantire compatibilità mobile assoluta (playsinline=1)
-  const getEmbedUrl = (url) => {
+const getEmbedUrl = (url) => {
     if (!url) return null;
-    let finalUrl = url;
-    if (url.includes('/shorts/')) finalUrl = url.replace('/shorts/', '/embed/');
-    else if (url.includes('youtu.be/')) finalUrl = url.replace('youtu.be/', 'www.youtube.com/embed/').split('?')[0];
-    else if (url.includes('watch?v=')) finalUrl = url.replace('watch?v=', 'embed/').split('&')[0];
     
-    // Aggiungiamo playsinline per evitare che su iOS apra player strani
-    return finalUrl.includes('?') ? `${finalUrl}&playsinline=1` : `${finalUrl}?playsinline=1`;
+    // Questa espressione regolare infallibile estrae l'ID di 11 caratteri del video 
+    // da qualsiasi link (shorts, youtu.be, watch?v=...)
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+    
+    if (match && match[1]) {
+      const videoId = match[1];
+      // Usiamo youtube-nocookie per aggirare i blocchi di Safari iOS
+      // playsinline=1 forza la riproduzione in pagina, rel=0 toglie i video consigliati di altri canali
+      return `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`;
+    }
+    
+    return url;
   };
 
+  // Prepara i dati per il grafico (inverte array per avere ordine cronologico corretto)
+  const datiGrafico = esercizio.pesi ? [...esercizio.pesi].reverse().map(p => ({
+    data: new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
+    peso: parseFloat(p.peso_kg) || 0
+  })) : [];
+
   return (
-    <div className="bg-card border border-border border-l-4 border-l-accent rounded-lg p-4 sm:p-5 mb-4 shadow-sm">
+    <div className="bg-card border border-border border-l-4 border-l-accent rounded-lg p-4 sm:p-5 mb-4 shadow-sm relative overflow-hidden">
       <h3 className="font-display font-semibold text-xl mb-3">{esercizio.nome}</h3>
 
-      {/* Tabellone: serie / ripetizioni / recupero */}
       <div className="grid grid-cols-3 divide-x divide-border border border-border rounded bg-white/60 mb-4 shadow-sm">
         <div className="text-center py-2">
           <p className="font-display font-semibold text-lg sm:text-xl leading-none">{esercizio.serie ?? '—'}</p>
@@ -69,52 +118,38 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
       </div>
 
       {esercizio.note_pt && (
-        <p className="text-sm italic text-inkmuted border-l-2 border-border pl-3 mb-4">
-          {esercizio.note_pt}
-        </p>
+        <p className="text-sm italic text-inkmuted border-l-2 border-border pl-3 mb-4">{esercizio.note_pt}</p>
       )}
 
       {esercizio.nota_atleta && (
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <span className="block text-xs font-bold text-yellow-800 uppercase tracking-wider mb-1">
-            📝 Nota di Simone:
-          </span>
+          <span className="block text-xs font-bold text-yellow-800 uppercase tracking-wider mb-1">📝 Nota di Simone:</span>
           <p className="text-sm text-yellow-900">{esercizio.nota_atleta}</p>
         </div>
       )}
 
-      {/* Contenitore Video 16:9 "Bulletproof" per mobile */}
-      {esercizio.video_url ? (
+      {esercizio.video_url && (
         <div className="w-full mb-5 relative pt-[56.25%] bg-black rounded overflow-hidden shadow-sm">
           <iframe 
             src={getEmbedUrl(esercizio.video_url)} 
             className="absolute top-0 left-0 w-full h-full"
             allowFullScreen
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             title={`Video ${esercizio.nome}`}
           ></iframe>
         </div>
-      ) : (
-        <p className="text-sm text-inkmuted mb-4">Nessun video caricato.</p>
       )}
 
-      {/* Diario pesi */}
       <div className="border-t border-border pt-4">
         <p className="text-sm font-bold text-inkmuted uppercase tracking-wide mb-3">Diario pesi</p>
         {esercizio.pesi && esercizio.pesi.length > 0 ? (
           <ul className="space-y-2 mb-4">
             {esercizio.pesi.map((p, i) => (
-              <li
-                key={p.id}
-                className={`flex items-center justify-between text-sm p-2 rounded ${i === 0 ? 'bg-stone-50 border border-stone-100 font-medium' : 'text-inkmuted'}`}
-              >
+              <li key={p.id} className={`flex items-center justify-between text-sm p-2 rounded ${i === 0 ? 'bg-stone-50 border border-stone-100 font-medium' : 'text-inkmuted'}`}>
                 <span>
                   <span className={`font-display ${i === 0 ? 'text-stone-900 font-bold' : ''}`}>{p.peso_kg ?? '—'} kg</span>
                   {p.ripetizioni_fatte && <span> × {p.ripetizioni_fatte}</span>}
                 </span>
-                <span className="text-xs">
-                  {new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}
-                </span>
+                <span className="text-xs">{new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}</span>
               </li>
             ))}
           </ul>
@@ -122,52 +157,50 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
           <p className="text-sm text-inkmuted mb-4">Ancora nessuna serie registrata.</p>
         )}
 
-        {/* Form responsive e anti-zoom */}
         {isAtleta && (
           <form onSubmit={registraSerie} className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
-            <input
-              type="number"
-              step="0.5"
-              placeholder="kg"
-              value={peso}
-              onChange={(e) => setPeso(e.target.value)}
-              // text-base previene lo zoom automatico su iOS!
-              className="w-[80px] sm:w-20 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <input
-              type="text"
-              placeholder="reps"
-              value={ripetizioniFatte}
-              onChange={(e) => setRipetizioniFatte(e.target.value)}
-              className="w-[90px] sm:w-24 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            {/* Tasto flessibile: si allunga su mobile, resta compatto su pc */}
-            <button
-              type="submit"
-              disabled={registrando}
-              className="flex-1 sm:flex-none flex justify-center items-center gap-1 bg-accent hover:bg-accentdark text-white text-base sm:text-sm font-medium px-4 py-2 sm:py-1.5 rounded transition-colors disabled:opacity-60"
-            >
-              <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} />
-              Registra
+            <input type="number" step="0.5" placeholder="kg" value={peso} onChange={(e) => setPeso(e.target.value)} className="w-[80px] sm:w-20 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent" />
+            <input type="text" placeholder="reps" value={ripetizioniFatte} onChange={(e) => setRipetizioniFatte(e.target.value)} className="w-[90px] sm:w-24 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent" />
+            <button type="submit" disabled={registrando} className="flex-1 sm:flex-none flex justify-center items-center gap-1 bg-accent hover:bg-accentdark text-white text-base sm:text-sm font-medium px-4 py-2 sm:py-1.5 rounded transition-colors disabled:opacity-60">
+              <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} /> Registra
             </button>
           </form>
         )}
       </div>
 
+      {/* OVERLAY TIMER */}
+      {timerAttivo && (
+        <div className="mt-4 p-4 bg-stone-900 text-white rounded-xl flex items-center justify-between shadow-lg transition-all animate-pulse">
+          <div className="flex items-center gap-3">
+            <Timer className="w-5 h-5 text-accent" />
+            <span className="font-display font-bold text-xl">{formatTime(timer)}</span>
+          </div>
+          <button onClick={() => setTimerAttivo(false)} className="text-xs font-medium bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg transition-colors">
+            Salta Recupero
+          </button>
+        </div>
+      )}
+
+      {/* GRAFICO TREND CARICHI */}
+      {esercizio.pesi && esercizio.pesi.length > 1 && (
+        <div className="mt-5 pt-4 border-t border-stone-100">
+          <p className="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-2">Trend di Carico</p>
+          <div className="h-24 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={datiGrafico}>
+                <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
+                <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }} labelStyle={{ display: 'none' }} itemStyle={{ color: '#1c1917', fontWeight: 'bold' }} />
+                <Line type="monotone" dataKey="peso" name="Kg" stroke="#1c1917" strokeWidth={3} dot={{ r: 4, fill: '#1c1917', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
       {isAtleta && (
         <div className="border-t border-border pt-4 mt-4">
-          <textarea
-            value={nota}
-            onChange={(e) => setNota(e.target.value)}
-            placeholder="Le tue note, sensazioni, aggiustamenti..."
-            rows={2}
-            className="w-full px-3 py-2 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent placeholder-stone-400"
-          />
-          <button
-            onClick={salvaNota}
-            disabled={salvataggioNota}
-            className="mt-2 text-sm text-accent hover:text-accentdark font-semibold disabled:opacity-60 flex justify-end w-full"
-          >
+          <textarea value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Le tue note, sensazioni, aggiustamenti..." rows={2} className="w-full px-3 py-2 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent placeholder-stone-400" />
+          <button onClick={salvaNota} disabled={salvataggioNota} className="mt-2 text-sm text-accent hover:text-accentdark font-semibold disabled:opacity-60 flex justify-end w-full">
             {salvataggioNota ? 'Salvataggio...' : 'Salva nota'}
           </button>
         </div>
