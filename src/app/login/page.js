@@ -2,69 +2,93 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Dumbbell } from 'lucide-react';
 
-export default function Login() {
+export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errore, setErrore] = useState('');
-  const [caricamento, setCaricamento] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setErrore('');
-    setCaricamento(true);
-    const risultato = await signIn('credentials', { email, password, redirect: false });
-    setCaricamento(false);
-    if (risultato?.error) {
-      setErrore('Email o password non corrette.');
+    setLoading(true);
+    setError('');
+    
+    const res = await signIn('credentials', { 
+      redirect: false, 
+      email, 
+      password 
+    });
+    
+    if (res?.error) {
+      setError('Email o password errate.');
+      setLoading(false);
     } else {
-      router.push('/dashboard');
+      router.push('/dashboard'); 
+      router.refresh();
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 mb-8 justify-center">
-          <Dumbbell className="w-6 h-6 text-accent" strokeWidth={2.5} />
-          <span className="font-display font-semibold text-xl tracking-tight">Diario Allenamento</span>
-        </div>
+    <div className="flex flex-col items-center justify-center mt-16 sm:mt-24 px-4">
+      {/* Intestazione Brand */}
+      <div className="mb-10 text-center">
+        <h1 className="font-display font-bold text-4xl tracking-tight text-stone-900 font-['Oswald'] uppercase mb-2">
+          Gestionale Palestra
+        </h1>
+        <p className="text-stone-500 text-sm font-medium">
+          Accedi al tuo diario di allenamento
+        </p>
+      </div>
 
-        <div className="bg-card border border-border rounded-lg border-l-4 border-l-accent p-8">
-          <h1 className="font-display font-semibold text-2xl mb-6">Accedi</h1>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-inkmuted mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-3 py-2 bg-white border border-border rounded focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-inkmuted mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full px-3 py-2 bg-white border border-border rounded focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            {errore && <p className="text-sm text-red-700">{errore}</p>}
-            <button
-              type="submit"
-              disabled={caricamento}
-              className="w-full bg-accent hover:bg-accentdark text-white font-medium py-2.5 rounded transition-colors disabled:opacity-60"
-            >
-              {caricamento ? 'Accesso...' : 'Entra'}
-            </button>
-          </form>
-        </div>
+      {/* Form di Login Moderno */}
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-stone-200/50 border border-stone-100 p-8">
+        <h2 className="text-2xl font-bold text-stone-800 mb-6">Accedi</h2>
+
+        {error && (
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg font-medium">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all placeholder-stone-400"
+              placeholder="Inserisci la tua email"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all placeholder-stone-400"
+              placeholder="••••••••"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-sm font-bold transition-colors shadow-md disabled:opacity-70 mt-4"
+          >
+            {loading ? 'Accesso in corso...' : 'Entra'}
+          </button>
+        </form>
       </div>
     </div>
   );

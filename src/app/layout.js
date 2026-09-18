@@ -28,7 +28,7 @@ function MainHeader() {
   // 3. Estraiamo il ruolo e il nome utente dalla sessione in modo dinamico
   const ruolo = session.user?.ruolo === 'pt' ? 'Personal Trainer' : 'Atleta';
   // Prende il nome (se esiste) oppure la parte della mail prima della chiocciola
-  const nomeUtente = session.user?.name || session.user?.email?.split('@')[0] || 'Utente';
+  const nomeUtente = session.user?.ruolo === 'pt' ? 'Mattia' : 'Simone';
 
   return (
     <header className="w-full bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between shadow-sm">
