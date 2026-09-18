@@ -23,6 +23,12 @@ export default async function SchedaPage({ params }) {
     schedaId,
   ]);
 
+  giorni.sort((a, b) => {
+    if (a.nome.toLowerCase().includes('riscaldamento')) return -1;
+    if (b.nome.toLowerCase().includes('riscaldamento')) return 1;
+    return a.ordine - b.ordine;
+  });8
+
   const giorniConEsercizi = await Promise.all(
     giorni.map(async (giorno) => {
       const { rows: esercizi } = await query(

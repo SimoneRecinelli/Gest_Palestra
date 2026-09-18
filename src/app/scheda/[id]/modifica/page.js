@@ -22,6 +22,13 @@ export default async function ModificaSchedaPage({ params }) {
 
   const { rows: giorni } = await query('SELECT * FROM giorni WHERE scheda_id = $1 ORDER BY ordine', [schedaId]);
 
+
+  giorni.sort((a, b) => {
+    if (a.nome.toLowerCase().includes('riscaldamento')) return -1;
+    if (b.nome.toLowerCase().includes('riscaldamento')) return 1;
+    return a.ordine - b.ordine;
+  });
+  
   const giorniConEsercizi = await Promise.all(
     giorni.map(async (giorno) => {
       const { rows: esercizi } = await query(`SELECT * FROM esercizi WHERE giorno_id = $1 ORDER BY ordine`, [giorno.id]);
