@@ -9,14 +9,19 @@ export async function PATCH(request, { params }) {
 
   const id = params.id;
   const data = await request.json();
+  
+  // Aggiunto 'ordine' nella destrutturazione
+  const { nome, serie, ripetizioni, recupero, note_pt, video_url, is_superset, ordine } = data;
 
   try {
     await query(
-      `UPDATE esercizi SET nome = $1, serie = $2, ripetizioni = $3, recupero = $4, note_pt = $5, video_url = $6 WHERE id = $7`,
-      [data.nome, data.serie || null, data.ripetizioni, data.recupero, data.note_pt, data.video_url, id]
+      `UPDATE esercizi SET nome = $1, serie = $2, ripetizioni = $3, recupero = $4, note_pt = $5, video_url = $6, is_superset = $7, ordine = $8 WHERE id = $9`,
+      [nome, serie, ripetizioni, recupero, note_pt, video_url, is_superset, ordine || 0, id]
     );
     return NextResponse.json({ success: true });
-  } catch (error) { return NextResponse.json({ error: 'Errore' }, { status: 500 }); }
+  } catch (error) { 
+    return NextResponse.json({ error: 'Errore' }, { status: 500 }); 
+  }
 }
 
 export async function DELETE(request, { params }) {
@@ -26,5 +31,7 @@ export async function DELETE(request, { params }) {
   try {
     await query('DELETE FROM esercizi WHERE id = $1', [params.id]);
     return NextResponse.json({ success: true });
-  } catch (error) { return NextResponse.json({ error: 'Errore' }, { status: 500 }); }
+  } catch (error) { 
+    return NextResponse.json({ error: 'Errore' }, { status: 500 }); 
+  }
 }

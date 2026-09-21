@@ -10,6 +10,8 @@ export default function NuovoEsercizioForm({ giornoId }) {
   const [ripetizioni, setRipetizioni] = useState('');
   const [recupero, setRecupero] = useState('');
   const [notePt, setNotePt] = useState('');
+  const [ordine, setOrdine] = useState(0);
+  const [isSuperset, setIsSuperset] = useState(false);
   const [file, setFile] = useState(null);
   const [caricamento, setCaricamento] = useState(false);
   const router = useRouter();
@@ -40,7 +42,17 @@ export default function NuovoEsercizioForm({ giornoId }) {
     await fetch('/api/esercizi', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ giornoId, nome, serie, ripetizioni, recupero, notePt, videoUrl }),
+      body: JSON.stringify({ 
+        giornoId, 
+        nome, 
+        serie, 
+        ripetizioni, 
+        recupero, 
+        notePt, 
+        videoUrl, 
+        ordine, 
+        is_superset: isSuperset 
+      }),
     });
 
     setCaricamento(false);
@@ -49,6 +61,8 @@ export default function NuovoEsercizioForm({ giornoId }) {
     setRipetizioni('');
     setRecupero('');
     setNotePt('');
+    setOrdine(0);
+    setIsSuperset(false);
     setFile(null);
     setAperto(false);
     router.refresh();
@@ -80,26 +94,48 @@ export default function NuovoEsercizioForm({ giornoId }) {
           required
           className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
         />
-        <div className="grid grid-cols-3 gap-2">
-          <input
-            placeholder="Serie"
-            value={serie}
-            onChange={(e) => setSerie(e.target.value)}
-            className="px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-          <input
-            placeholder="Rip. (8-10)"
-            value={ripetizioni}
-            onChange={(e) => setRipetizioni(e.target.value)}
-            className="px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-          <input
-            placeholder="Recupero"
-            value={recupero}
-            onChange={(e) => setRecupero(e.target.value)}
-            className="px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          />
+        
+{/* Griglia form corretta con etichette chiare */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Serie</label>
+            <input
+              placeholder="Es: 4"
+              value={serie}
+              onChange={(e) => setSerie(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Ripetizioni</label>
+            <input
+              placeholder="8-10"
+              value={ripetizioni}
+              onChange={(e) => setRipetizioni(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Recupero</label>
+            <input
+              placeholder="90s o 1'30"
+              value={recupero}
+              onChange={(e) => setRecupero(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Ordine (Pos.)</label>
+            <input
+              type="number"
+              placeholder="0"
+              value={ordine}
+              onChange={(e) => setOrdine(parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
         </div>
+
         <textarea
           placeholder="Consigli su come eseguire l'esercizio"
           value={notePt}
@@ -107,6 +143,21 @@ export default function NuovoEsercizioForm({ giornoId }) {
           rows={2}
           className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
         />
+
+        {/* Spunta Superserietà */}
+        <div className="flex items-center space-x-2 pt-1">
+          <input
+            type="checkbox"
+            id="nuovo-superset-form"
+            checked={isSuperset}
+            onChange={(e) => setIsSuperset(e.target.checked)}
+            className="w-4 h-4 text-stone-900 border-border rounded focus:ring-accent cursor-pointer"
+          />
+          <label htmlFor="nuovo-superset-form" className="text-sm font-medium text-stone-700 cursor-pointer">
+            ⚡ In superset con l'esercizio successivo
+          </label>
+        </div>
+
         <div>
           <label className="block text-sm text-inkmuted mb-1">Video dell'esecuzione</label>
           <input
@@ -117,6 +168,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
           />
         </div>
       </div>
+
       <button
         type="submit"
         disabled={caricamento}

@@ -20,27 +20,39 @@ export async function POST(request) {
      WHERE g.id = $1 AND s.pt_id = $2`,
     [giornoId, session.user.id]
   );
+  
   if (giornoRows.length === 0) {
     return NextResponse.json({ errore: 'Giorno non trovato o non tuo' }, { status: 403 });
   }
 
-  const { rows: maxOrdine } = await query(
-    'SELECT COALESCE(MAX(ordine), -1) AS max FROM esercizi WHERE giorno_id = $1',
-    [giornoId]
-  );
+  // Prende l'ordine dal form (se esiste e non è vuoto)
+  let ordineFinale = data.ordine !== undefined && data.ordine !== '' ? parseInt(data.ordine) : null;
+
+  // Se l'ordine non è stato fornito dal form, lo calcola in automatico mettendolo in fondo
+  if (ordineFinale === null || isNaN(ordineFinale)) {
+    const { rows: maxOrdine } = await query(
+      'SELECT COALESCE(MAX(ordine), -1) AS max FROM esercizi WHERE giorno_id = $1',
+      [giornoId]
+    );
+    ordineFinale = maxOrdine[0].max + 1;
+  }
+
+  // Assicuriamoci di prendere anche is_superset
+  const is_superset = data.is_superset || false;
 
   await query(
-    `INSERT INTO esercizi (giorno_id, nome, serie, ripetizioni, recupero, note_pt, video_url, ordine)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    `INSERT INTO esercizi (giorno_id, nome, serie, ripetizioni, recupero, note_pt, video_url, ordine, is_superset)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     [
       giornoId,
-      data.nome || 'Nuovo Esercizio',  // Inserisce questo se il campo è vuoto
-      data.serie || 3,
-      data.ripetizioni || '10',
-      data.recupero || "1'",
-      data.notePt || null,
-      data.videoUrl || null,
-      maxOrdine[0].max + 1,
+      data.nome || 'Nuovo Esercizio',
+      data.serie || null,
+      data.ripetizioni || null,
+      data.recupero || null,
+      data.notePt || data.note_pt || null,
+      data.videoUrl || data.video_url || null,
+      ordineFinale,
+      is_superset
     ]
   );
 

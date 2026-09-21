@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Sfondo con i colori del brand (Stone scuro) e angoli arrotondati stile iOS -->
+  <rect width="512" height="512" rx="112" fill="#1c1917" />
+  
+  <!-- Dettaglio anello esterno del disco da 20kg -->
+  <circle cx="256" cy="256" r="160" fill="none" stroke="#f5f2eb" stroke-width="24" opacity="0.2" />
+  
+  <!-- Impugnatura centrale / Bilanciere -->
+  <rect x="136" y="232" width="240" height="48" rx="12" fill="#f5f2eb" />
+  
+  <!-- Dischi laterali stilizzati -->
+  <rect x="112" y="140" width="48" height="232" rx="16" fill="#f5f2eb" />
+  <rect x="352" y="140" width="48" height="232" rx="16" fill="#f5f2eb" />
+  
+  <!-- Foro centrale del bilanciere -->
+  <circle cx="256" cy="256" r="20" fill="#1c1917" />
+</svg>

@@ -75,20 +75,12 @@ export default function EsercizioCard({ esercizio, isAtleta }) {
     router.refresh();
   }
 
-const getEmbedUrl = (url) => {
+  const getEmbedUrl = (url) => {
     if (!url) return null;
-    
-    // Questa espressione regolare infallibile estrae l'ID di 11 caratteri del video 
-    // da qualsiasi link (shorts, youtu.be, watch?v=...)
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
-    
     if (match && match[1]) {
-      const videoId = match[1];
-      // Usiamo youtube-nocookie per aggirare i blocchi di Safari iOS
-      // playsinline=1 forza la riproduzione in pagina, rel=0 toglie i video consigliati di altri canali
-      return `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`;
+      return `https://www.youtube-nocookie.com/embed/${match[1]}?playsinline=1&rel=0&modestbranding=1`;
     }
-    
     return url;
   };
 
@@ -99,7 +91,17 @@ const getEmbedUrl = (url) => {
   })) : [];
 
   return (
-    <div className="bg-card border border-border border-l-4 border-l-accent rounded-lg p-4 sm:p-5 mb-4 shadow-sm relative overflow-hidden">
+    <div className={`bg-card border border-border rounded-lg p-4 sm:p-5 mb-4 shadow-sm relative overflow-hidden transition-all ${esercizio.is_superset ? 'border-b-2 border-b-accent bg-amber-50/20' : ''} border-l-4 border-l-accent`}>
+      
+      {/* Etichetta Superserie Chiara ed Evidente */}
+      {esercizio.is_superset && (
+        <div className="mb-3 flex items-center justify-between bg-stone-900 text-white px-3 py-1.5 rounded-md shadow-sm">
+          <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 text-amber-400">
+            ⚡ SUPERSERIE (collegato al successivo ↓)
+          </span>
+        </div>
+      )}
+
       <h3 className="font-display font-semibold text-xl mb-3">{esercizio.nome}</h3>
 
       <div className="grid grid-cols-3 divide-x divide-border border border-border rounded bg-white/60 mb-4 shadow-sm">
