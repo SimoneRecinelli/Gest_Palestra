@@ -1,10 +1,13 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X } from 'lucide-react';
+import { Plus, X, Search } from 'lucide-react';
 
 export default function NuovoEsercizioForm({ giornoId }) {
   const [aperto, setAperto] = useState(false);
+  const [libreria, setLibreria] = useState([]);
+  
+  // Stati del form
   const [nome, setNome] = useState('');
   const [serie, setSerie] = useState('');
   const [ripetizioni, setRipetizioni] = useState('');
@@ -13,14 +16,44 @@ export default function NuovoEsercizioForm({ giornoId }) {
   const [ordine, setOrdine] = useState(0);
   const [isSuperset, setIsSuperset] = useState(false);
   const [file, setFile] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(''); // Aggiunto per gestire i link recuperati dalla libreria
+  
   const [caricamento, setCaricamento] = useState(false);
   const router = useRouter();
+
+  // Carica la libreria esercizi del PT quando si apre il form
+  useEffect(() => {
+    if (aperto && libreria.length === 0) {
+      fetch('/api/esercizi/libreria')
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) setLibreria(data);
+        })
+        .catch(err => console.error("Errore caricamento libreria", err));
+    }
+  }, [aperto, libreria.length]);
+
+  // Funzione che autocompila il form quando si sceglie un esercizio
+  const handleSelezionaDallaLibreria = (e) => {
+    const nomeSelezionato = e.target.value;
+    if (!nomeSelezionato) return;
+    
+    const esEsistente = libreria.find(es => es.nome === nomeSelezionato);
+    if (esEsistente) {
+      setNome(esEsistente.nome || '');
+      setSerie(esEsistente.serie || '');
+      setRipetizioni(esEsistente.ripetizioni || '');
+      setRecupero(esEsistente.recupero || '');
+      setNotePt(esEsistente.note_pt || '');
+      setVideoUrl(esEsistente.video_url || '');
+    }
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
     setCaricamento(true);
 
-    let videoUrl = null;
+    let urlVideoFinale = videoUrl;
 
     if (file) {
       const rispostaUrl = await fetch('/api/upload-url', {
@@ -36,7 +69,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
         body: file,
       });
 
-      videoUrl = url;
+      urlVideoFinale = url;
     }
 
     await fetch('/api/esercizi', {
@@ -49,7 +82,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
         ripetizioni, 
         recupero, 
         notePt, 
-        videoUrl, 
+        videoUrl: urlVideoFinale, 
         ordine, 
         is_superset: isSuperset 
       }),
@@ -64,6 +97,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
     setOrdine(0);
     setIsSuperset(false);
     setFile(null);
+    setVideoUrl('');
     setAperto(false);
     router.refresh();
   }
@@ -72,7 +106,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
     return (
       <button
         onClick={() => setAperto(true)}
-        className="flex items-center gap-2 text-accent font-medium hover:text-accentdark mb-6"
+        className="flex items-center gap-2 text-accent font-medium hover:text-accentdark mb-6 mt-4"
       >
         <Plus className="w-4 h-4" strokeWidth={2.5} />
         Aggiungi esercizio
@@ -81,21 +115,45 @@ export default function NuovoEsercizioForm({ giornoId }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-5 mb-6 relative">
+    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-5 mb-6 mt-4 relative animate-in fade-in slide-in-from-top-2 duration-200">
       <button type="button" onClick={() => setAperto(false)} className="absolute top-4 right-4 text-inkmuted hover:text-ink">
         <X className="w-4 h-4" />
       </button>
+      
       <h4 className="font-display font-semibold text-lg mb-4">Nuovo esercizio</h4>
-      <div className="space-y-3">
-        <input
-          placeholder="Nome esercizio"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          required
-          className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+      
+      <div className="space-y-4">
         
-{/* Griglia form corretta con etichette chiare */}
+        {/* MENU A TENDINA DELLA LIBRERIA */}
+        {libreria.length > 0 && (
+          <div className="bg-stone-50 p-3 rounded-lg border border-stone-200 mb-2">
+            <label className="flex items-center gap-1.5 text-xs font-bold text-stone-500 uppercase mb-2">
+              <Search className="w-3.5 h-3.5" /> Scegli dallo storico (opzionale)
+            </label>
+            <select 
+              onChange={handleSelezionaDallaLibreria}
+              defaultValue=""
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="" disabled>Seleziona un esercizio per autocompilare...</option>
+              {libreria.map((es, idx) => (
+                <option key={idx} value={es.nome}>{es.nome}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Nome Esercizio</label>
+          <input
+            placeholder="Es: Panca Piana"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+            className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+        </div>
+        
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
             <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Serie</label>
@@ -136,16 +194,19 @@ export default function NuovoEsercizioForm({ giornoId }) {
           </div>
         </div>
 
-        <textarea
-          placeholder="Consigli su come eseguire l'esercizio"
-          value={notePt}
-          onChange={(e) => setNotePt(e.target.value)}
-          rows={2}
-          className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-        />
+        <div>
+          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Istruzioni / Note PT</label>
+          <textarea
+            placeholder="Consigli su come eseguire l'esercizio"
+            value={notePt}
+            onChange={(e) => setNotePt(e.target.value)}
+            rows={2}
+            className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+          />
+        </div>
 
         {/* Spunta Superserietà */}
-        <div className="flex items-center space-x-2 pt-1">
+        <div className="flex items-center space-x-2 pt-1 pb-2 border-b border-stone-100">
           <input
             type="checkbox"
             id="nuovo-superset-form"
@@ -159,12 +220,21 @@ export default function NuovoEsercizioForm({ giornoId }) {
         </div>
 
         <div>
-          <label className="block text-sm text-inkmuted mb-1">Video dell'esecuzione</label>
+          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Link Video (YouTube) esistente</label>
+          <input
+            type="url"
+            placeholder="https://..."
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            className="w-full px-3 py-2 mb-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+          />
+          
+          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Oppure carica un nuovo video file</label>
           <input
             type="file"
             accept="video/*"
             onChange={(e) => setFile(e.target.files[0])}
-            className="text-sm"
+            className="text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200"
           />
         </div>
       </div>
@@ -172,9 +242,9 @@ export default function NuovoEsercizioForm({ giornoId }) {
       <button
         type="submit"
         disabled={caricamento}
-        className="mt-4 bg-accent hover:bg-accentdark text-white font-medium px-4 py-2 rounded transition-colors disabled:opacity-60"
+        className="mt-6 w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
       >
-        {caricamento ? 'Caricamento...' : 'Salva esercizio'}
+        {caricamento ? 'Salvataggio in corso...' : 'Salva esercizio'}
       </button>
     </form>
   );
