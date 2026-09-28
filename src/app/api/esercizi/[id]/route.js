@@ -23,9 +23,10 @@ export async function PATCH(request, { params }) {
          recupero = $4, 
          note_pt = $5, 
          video_url = $6,
-         is_superset = $7,
-         ordine = $8
-       WHERE id = $9`,
+         gruppo_muscolare = $7,
+         is_superset = $8,
+         ordine = $9
+       WHERE id = $10`,
       [
         data.nome || 'Esercizio',
         // Trasforma le stringhe vuote in null per evitare errori nel database
@@ -34,6 +35,7 @@ export async function PATCH(request, { params }) {
         data.recupero === '' ? null : data.recupero,
         data.note_pt === '' ? null : data.note_pt,
         data.video_url === '' ? null : data.video_url,
+        data.gruppo_muscolare === '' ? null : data.gruppo_muscolare,
         data.is_superset || false,
         data.ordine !== '' && data.ordine !== undefined ? parseInt(data.ordine) : 0,
         id

@@ -9,6 +9,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
   
   // Stati del form
   const [nome, setNome] = useState('');
+  const [gruppoMuscolare, setGruppoMuscolare] = useState(''); // <-- Stato aggiunto
   const [serie, setSerie] = useState('');
   const [ripetizioni, setRipetizioni] = useState('');
   const [recupero, setRecupero] = useState('');
@@ -16,12 +17,11 @@ export default function NuovoEsercizioForm({ giornoId }) {
   const [ordine, setOrdine] = useState(0);
   const [isSuperset, setIsSuperset] = useState(false);
   const [file, setFile] = useState(null);
-  const [videoUrl, setVideoUrl] = useState(''); // Aggiunto per gestire i link recuperati dalla libreria
+  const [videoUrl, setVideoUrl] = useState(''); 
   
   const [caricamento, setCaricamento] = useState(false);
   const router = useRouter();
 
-  // Carica la libreria esercizi del PT quando si apre il form
   useEffect(() => {
     if (aperto && libreria.length === 0) {
       fetch('/api/esercizi/libreria')
@@ -33,7 +33,6 @@ export default function NuovoEsercizioForm({ giornoId }) {
     }
   }, [aperto, libreria.length]);
 
-  // Funzione che autocompila il form quando si sceglie un esercizio
   const handleSelezionaDallaLibreria = (e) => {
     const nomeSelezionato = e.target.value;
     if (!nomeSelezionato) return;
@@ -41,6 +40,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
     const esEsistente = libreria.find(es => es.nome === nomeSelezionato);
     if (esEsistente) {
       setNome(esEsistente.nome || '');
+      setGruppoMuscolare(esEsistente.gruppo_muscolare || ''); // <-- Autocompilazione
       setSerie(esEsistente.serie || '');
       setRipetizioni(esEsistente.ripetizioni || '');
       setRecupero(esEsistente.recupero || '');
@@ -78,6 +78,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
       body: JSON.stringify({ 
         giornoId, 
         nome, 
+        gruppo_muscolare: gruppoMuscolare, // <-- Invio dati al DB
         serie, 
         ripetizioni, 
         recupero, 
@@ -90,6 +91,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
 
     setCaricamento(false);
     setNome('');
+    setGruppoMuscolare('');
     setSerie('');
     setRipetizioni('');
     setRecupero('');
@@ -124,7 +126,6 @@ export default function NuovoEsercizioForm({ giornoId }) {
       
       <div className="space-y-4">
         
-        {/* MENU A TENDINA DELLA LIBRERIA */}
         {libreria.length > 0 && (
           <div className="bg-stone-50 p-3 rounded-lg border border-stone-200 mb-2">
             <label className="flex items-center gap-1.5 text-xs font-bold text-stone-500 uppercase mb-2">
@@ -143,15 +144,35 @@ export default function NuovoEsercizioForm({ giornoId }) {
           </div>
         )}
 
-        <div>
-          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Nome Esercizio</label>
-          <input
-            placeholder="Es: Panca Piana"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            required
-            className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          />
+        {/* GRIGLIA NOME E GRUPPO MUSCOLARE */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Nome Esercizio</label>
+            <input
+              placeholder="Es: Panca Piana"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Gruppo Muscolare</label>
+            <select
+              value={gruppoMuscolare}
+              onChange={(e) => setGruppoMuscolare(e.target.value)}
+              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+            >
+              <option value="">Nessuno</option>
+              <option value="Petto">Petto</option>
+              <option value="Dorso">Dorso</option>
+              <option value="Gambe">Gambe</option>
+              <option value="Spalle">Spalle</option>
+              <option value="Bicipiti">Bicipiti</option>
+              <option value="Tricipiti">Tricipiti</option>
+              <option value="Addome">Addome</option>
+            </select>
+          </div>
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -205,7 +226,6 @@ export default function NuovoEsercizioForm({ giornoId }) {
           />
         </div>
 
-        {/* Spunta Superserietà */}
         <div className="flex items-center space-x-2 pt-1 pb-2 border-b border-stone-100">
           <input
             type="checkbox"

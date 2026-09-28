@@ -115,7 +115,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
         className="p-4 sm:p-5 cursor-pointer hover:bg-stone-50 transition-colors flex justify-between items-center"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div>
+        <div className="pr-3">
           {esercizio.is_superset && (
             <span className="text-[10px] font-bold uppercase tracking-wider bg-stone-900 text-amber-400 px-2 py-1 rounded mb-2 inline-block shadow-sm">
               ⚡ Superset (collegato al successivo)
@@ -123,9 +123,20 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
           )}
           <h3 className="font-display font-semibold text-xl">{esercizio.nome}</h3>
         </div>
-        <button className="text-stone-400 hover:text-stone-700 bg-stone-100 p-2 rounded-full">
-          {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-        </button>
+        
+        {/* IL BADGE DEL GRUPPO MUSCOLARE E LA FRECCIA */}
+        <div className="flex items-center gap-3 shrink-0">
+          
+          {esercizio.gruppo_muscolare && (
+            <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200 shadow-sm">
+              {esercizio.gruppo_muscolare}
+            </span>
+          )}
+          
+          <button className="text-stone-400 hover:text-stone-700 bg-stone-100 p-2 rounded-full shrink-0">
+            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* CONTENUTO DELLA CARD (VISIBILE SOLO SE EXPANDED) */}

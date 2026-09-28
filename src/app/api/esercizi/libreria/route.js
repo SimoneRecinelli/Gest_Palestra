@@ -19,7 +19,8 @@ export async function GET(request) {
           LAST_VALUE(e.ripetizioni) OVER w AS ripetizioni, 
           LAST_VALUE(e.recupero) OVER w AS recupero, 
           LAST_VALUE(e.note_pt) OVER w AS note_pt, 
-          LAST_VALUE(e.video_url) OVER w AS video_url
+          LAST_VALUE(e.video_url) OVER w AS video_url,
+          LAST_VALUE(e.gruppo_muscolare) OVER w AS gruppo_muscolare
        FROM esercizi e
        JOIN giorni g ON e.giorno_id = g.id
        JOIN schede s ON g.scheda_id = s.id

@@ -6,13 +6,14 @@ export default function ModificaEsercizio({ esercizio }) {
   const router = useRouter();
   const [formData, setFormData] = useState({
     nome: esercizio.nome || '',
+    gruppo_muscolare: esercizio.gruppo_muscolare || '', // <-- Aggiunto al form state
     serie: esercizio.serie || '',
     ripetizioni: esercizio.ripetizioni || '',
     recupero: esercizio.recupero || '',
     note_pt: esercizio.note_pt || '',
     video_url: esercizio.video_url || '',
     is_superset: esercizio.is_superset || false,
-    ordine: esercizio.ordine ?? 0 // <--- Aggiunto stato ordine
+    ordine: esercizio.ordine ?? 0
   });
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
@@ -37,7 +38,7 @@ export default function ModificaEsercizio({ esercizio }) {
 
   const eliminaEsercizio = async () => {
     if (!confirm('Sei sicuro di voler eliminare questo esercizio?')) return;
-    Loading(true); // piccolo fix se gestisci il loading
+    setLoading(true); 
     await fetch(`/api/esercizi/${esercizio.id}`, { method: 'DELETE' });
     router.refresh();
   };
@@ -45,12 +46,34 @@ export default function ModificaEsercizio({ esercizio }) {
   return (
     <div className="bg-white p-5 rounded-xl shadow-sm border border-stone-200 mb-4">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        <div className="col-span-1 md:col-span-3">
+        
+        {/* NOME ESERCIZIO */}
+        <div className="col-span-1 md:col-span-2">
           <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Nome Esercizio</label>
           <input type="text" name="nome" value={formData.nome} onChange={handleChange} className="w-full border rounded-md p-2" />
         </div>
 
-        {/* --- CAMPO ORDINE AGGIUNTO QUI --- */}
+        {/* TENDINA GRUPPO MUSCOLARE */}
+        <div className="col-span-1 md:col-span-1">
+          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Gruppo Musc.</label>
+          <select 
+            name="gruppo_muscolare" 
+            value={formData.gruppo_muscolare} 
+            onChange={handleChange} 
+            className="w-full border rounded-md p-2 bg-white"
+          >
+            <option value="">Nessuno</option>
+            <option value="Petto">Petto</option>
+            <option value="Dorso">Dorso</option>
+            <option value="Gambe">Gambe</option>
+            <option value="Spalle">Spalle</option>
+            <option value="Bicipiti">Bicipiti</option>
+            <option value="Tricipiti">Tricipiti</option>
+            <option value="Addome">Addome</option>
+          </select>
+        </div>
+
+        {/* ORDINE */}
         <div className="col-span-1 md:col-span-1">
           <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Ordine (N°)</label>
           <input type="number" name="ordine" value={formData.ordine} onChange={handleChange} className="w-full border rounded-md p-2" />

@@ -6,6 +6,9 @@ import SchedaTabs from './SchedaTabs';
 import Link from 'next/link';
 import DuplicaSchedaBtn from '@/app/components/DuplicaSchedaBtn';
 
+// QUESTA RIGA DISATTIVA LA CACHE: carica sempre i dati freschi dal database!
+export const dynamic = 'force-dynamic';
+
 export default async function SchedaPage({ params }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect('/login');
@@ -28,7 +31,7 @@ export default async function SchedaPage({ params }) {
     if (a.nome.toLowerCase().includes('riscaldamento')) return -1;
     if (b.nome.toLowerCase().includes('riscaldamento')) return 1;
     return a.ordine - b.ordine;
-  });8
+  }); // <-- RIMOSSO L'8 DI ERRORE CHE ERA QUI
 
   const giorniConEsercizi = await Promise.all(
     giorni.map(async (giorno) => {
@@ -36,7 +39,7 @@ export default async function SchedaPage({ params }) {
         `SELECT e.*, n.testo AS nota_atleta
          FROM esercizi e
          LEFT JOIN note_atleta n ON n.esercizio_id = e.id AND n.atleta_id = $2
-         WHERE e.giorno_id = $1 ORDER BY e.ordine`,
+         WHERE e.giorno_id = $1 ORDER BY e.ordine ASC, e.id ASC`, // <-- AGGIUNTO ORDINAMENTO PRECISO
         [giorno.id, scheda.atleta_id]
       );
       return { ...giorno, esercizi };
@@ -56,7 +59,7 @@ export default async function SchedaPage({ params }) {
     }
   }
 
-return (
+  return (
     <div className="max-w-2xl mx-auto px-6 py-10">
       <div className="flex justify-between items-center mb-6">
         <h1 className="font-display font-semibold text-2xl">{scheda.titolo}</h1>

@@ -41,8 +41,8 @@ export async function POST(request) {
   const is_superset = data.is_superset || false;
 
   await query(
-    `INSERT INTO esercizi (giorno_id, nome, serie, ripetizioni, recupero, note_pt, video_url, ordine, is_superset)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    `INSERT INTO esercizi (giorno_id, nome, serie, ripetizioni, recupero, note_pt, video_url, gruppo_muscolare, ordine, is_superset)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
     [
       giornoId,
       data.nome || 'Nuovo Esercizio',
@@ -51,6 +51,7 @@ export async function POST(request) {
       data.recupero || null,
       data.notePt || data.note_pt || null,
       data.videoUrl || data.video_url || null,
+      data.gruppo_muscolare || null,
       ordineFinale,
       is_superset
     ]
