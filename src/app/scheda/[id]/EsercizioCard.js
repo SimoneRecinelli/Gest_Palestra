@@ -14,7 +14,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
   const [registrando, setRegistrando] = useState(false);
 
   // Stato per l'apertura/chiusura della card (Fisarmonica)
-  const [isExpanded, setIsExpanded] = useState(true); // Di default aperto
+  const [isExpanded, setIsExpanded] = useState(false); // Di default chiusa: la seduta si legge come lista compatta
   const [anteprimaKo, setAnteprimaKo] = useState(false);
 
   // Ascolta i pulsanti "Espandi/Comprimi tutti"

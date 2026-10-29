@@ -10,7 +10,7 @@ export default function SchedaTabs({ giorni, isPt, isAtleta, schedaId }) {
   const giornoAttivo = giorni.find((g) => g.id === attivo);
 
   // Stato per inviare il comando di espansione/compressione a tutte le card
-  const [espansioneGlobale, setEspansioneGlobale] = useState({ stato: true, ts: 0 });
+  const [espansioneGlobale, setEspansioneGlobale] = useState({ stato: false, ts: 0 });
 
   return (
     <div>
