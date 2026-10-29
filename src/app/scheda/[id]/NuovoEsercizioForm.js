@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, X, Search } from 'lucide-react';
+import { Plus, X, Search, Link2 } from 'lucide-react';
+import { GRUPPI } from '@/app/components/gruppi';
 
 export default function NuovoEsercizioForm({ giornoId }) {
   const [aperto, setAperto] = useState(false);
@@ -106,37 +107,40 @@ export default function NuovoEsercizioForm({ giornoId }) {
 
   if (!aperto) {
     return (
-      <button
-        onClick={() => setAperto(true)}
-        className="flex items-center gap-2 text-accent font-medium hover:text-accentdark mb-6 mt-4"
-      >
-        <Plus className="w-4 h-4" strokeWidth={2.5} />
+      <button onClick={() => setAperto(true)} className="btn-dark w-full mt-2">
+        <Plus className="w-5 h-5" strokeWidth={2.5} />
         Aggiungi esercizio
       </button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-5 mb-6 mt-4 relative animate-in fade-in slide-in-from-top-2 duration-200">
-      <button type="button" onClick={() => setAperto(false)} className="absolute top-4 right-4 text-inkmuted hover:text-ink">
-        <X className="w-4 h-4" />
-      </button>
-      
-      <h4 className="font-display font-semibold text-lg mb-4">Nuovo esercizio</h4>
-      
+    <form onSubmit={handleSubmit} className="card p-5 mt-2 apri">
+      <div className="flex items-center justify-between mb-4">
+        <h4 className="font-display font-bold text-2xl tracking-wide">Nuovo esercizio</h4>
+        <button
+          type="button"
+          onClick={() => setAperto(false)}
+          aria-label="Chiudi"
+          className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-steel active:bg-black/5"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
       <div className="space-y-4">
-        
         {libreria.length > 0 && (
-          <div className="bg-stone-50 p-3 rounded-lg border border-stone-200 mb-2">
-            <label className="flex items-center gap-1.5 text-xs font-bold text-stone-500 uppercase mb-2">
-              <Search className="w-3.5 h-3.5" /> Scegli dallo storico (opzionale)
+          <div className="bg-chalk p-3.5 rounded-[12px]">
+            <label htmlFor="storico" className="flex items-center gap-1.5 text-[13px] font-semibold text-steel mb-2">
+              <Search className="w-4 h-4" /> Parti da un esercizio già usato
             </label>
-            <select 
+            <select
+              id="storico"
               onChange={handleSelezionaDallaLibreria}
               defaultValue=""
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              className="field"
             >
-              <option value="" disabled>Seleziona un esercizio per autocompilare...</option>
+              <option value="" disabled>Scegli per compilare i campi…</option>
               {libreria.map((es, idx) => (
                 <option key={idx} value={es.nome}>{es.nome}</option>
               ))}
@@ -144,127 +148,108 @@ export default function NuovoEsercizioForm({ giornoId }) {
           </div>
         )}
 
-        {/* GRIGLIA NOME E GRUPPO MUSCOLARE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Nome Esercizio</label>
+            <label htmlFor="nuovo-nome" className="field-label">Nome esercizio</label>
             <input
-              placeholder="Es: Panca Piana"
+              id="nuovo-nome"
+              placeholder="Es: Panca piana"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               required
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              className="field"
             />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Gruppo Muscolare</label>
+            <label htmlFor="nuovo-gruppo" className="field-label">Gruppo muscolare</label>
             <select
+              id="nuovo-gruppo"
               value={gruppoMuscolare}
               onChange={(e) => setGruppoMuscolare(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+              className="field"
             >
               <option value="">Nessuno</option>
-              <option value="Petto">Petto</option>
-              <option value="Dorso">Dorso</option>
-              <option value="Gambe">Gambe</option>
-              <option value="Spalle">Spalle</option>
-              <option value="Bicipiti">Bicipiti</option>
-              <option value="Tricipiti">Tricipiti</option>
-              <option value="Addome">Addome</option>
+              {GRUPPI.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
             </select>
           </div>
         </div>
-        
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Serie</label>
-            <input
-              placeholder="Es: 4"
-              value={serie}
-              onChange={(e) => setSerie(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
+            <label htmlFor="nuovo-serie" className="field-label">Serie</label>
+            <input id="nuovo-serie" inputMode="numeric" placeholder="4" value={serie} onChange={(e) => setSerie(e.target.value)} className="field" />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Ripetizioni</label>
-            <input
-              placeholder="8-10"
-              value={ripetizioni}
-              onChange={(e) => setRipetizioni(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
+            <label htmlFor="nuovo-rip" className="field-label">Ripetizioni</label>
+            <input id="nuovo-rip" placeholder="8-10" value={ripetizioni} onChange={(e) => setRipetizioni(e.target.value)} className="field" />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Recupero</label>
-            <input
-              placeholder="90s o 1'30"
-              value={recupero}
-              onChange={(e) => setRecupero(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
+            <label htmlFor="nuovo-rec" className="field-label">Recupero</label>
+            <input id="nuovo-rec" placeholder="90 o 1'30" value={recupero} onChange={(e) => setRecupero(e.target.value)} className="field" />
           </div>
           <div>
-            <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Ordine (Pos.)</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={ordine}
-              onChange={(e) => setOrdine(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-            />
+            <label htmlFor="nuovo-ordine" className="field-label">Posizione</label>
+            <input id="nuovo-ordine" type="number" inputMode="numeric" placeholder="0" value={ordine} onChange={(e) => setOrdine(parseInt(e.target.value) || 0)} className="field" />
           </div>
         </div>
 
         <div>
-          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Istruzioni / Note PT</label>
+          <label htmlFor="nuovo-note" className="field-label">Istruzioni per l'atleta</label>
           <textarea
-            placeholder="Consigli su come eseguire l'esercizio"
+            id="nuovo-note"
+            placeholder="Come eseguire l'esercizio"
             value={notePt}
             onChange={(e) => setNotePt(e.target.value)}
             rows={2}
-            className="w-full px-3 py-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+            className="field"
           />
         </div>
 
-        <div className="flex items-center space-x-2 pt-1 pb-2 border-b border-stone-100">
+        <label htmlFor="nuovo-superset-form" className="flex items-center gap-3 min-h-tap cursor-pointer">
           <input
             type="checkbox"
             id="nuovo-superset-form"
             checked={isSuperset}
             onChange={(e) => setIsSuperset(e.target.checked)}
-            className="w-4 h-4 text-stone-900 border-border rounded focus:ring-accent cursor-pointer"
+            className="w-6 h-6 rounded-md border-line accent-[#D42B1E] cursor-pointer"
           />
-          <label htmlFor="nuovo-superset-form" className="text-sm font-medium text-stone-700 cursor-pointer">
-            ⚡ In superset con l'esercizio successivo
-          </label>
-        </div>
+          <span className="flex items-center gap-1.5 font-semibold">
+            <Link2 className="w-4 h-4 text-signal" strokeWidth={2.5} />
+            Superset con l'esercizio successivo
+          </span>
+        </label>
 
-        <div>
-          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Link Video (YouTube) esistente</label>
-          <input
-            type="url"
-            placeholder="https://..."
-            value={videoUrl}
-            onChange={(e) => setVideoUrl(e.target.value)}
-            className="w-full px-3 py-2 mb-2 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent"
-          />
-          
-          <label className="block text-[10px] uppercase font-bold text-inkmuted mb-1">Oppure carica un nuovo video file</label>
-          <input
-            type="file"
-            accept="video/*"
-            onChange={(e) => setFile(e.target.files[0])}
-            className="text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200"
-          />
+        <div className="space-y-4">
+          <div>
+            <label htmlFor="nuovo-video" className="field-label">Link video (YouTube)</label>
+            <input
+              id="nuovo-video"
+              type="url"
+              inputMode="url"
+              autoCapitalize="none"
+              placeholder="https://…"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              className="field"
+            />
+          </div>
+          <div>
+            <label htmlFor="nuovo-file" className="field-label">Oppure carica un video</label>
+            <input
+              id="nuovo-file"
+              type="file"
+              accept="video/*"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="w-full text-sm file:mr-4 file:min-h-[40px] file:px-4 file:rounded-[10px] file:border-0 file:font-semibold file:bg-chalk file:text-rubber"
+            />
+          </div>
         </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={caricamento}
-        className="mt-6 w-full sm:w-auto bg-stone-900 hover:bg-stone-800 text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-      >
-        {caricamento ? 'Salvataggio in corso...' : 'Salva esercizio'}
+      <button type="submit" disabled={caricamento} className="btn-primary w-full mt-6">
+        {caricamento ? 'Salvataggio…' : 'Salva esercizio'}
       </button>
     </form>
   );

@@ -32,10 +32,10 @@ export default function DuplicaSchedaBtn({ schedaId }) {
     <button
       onClick={handleDuplica}
       disabled={loading}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-lg transition-colors disabled:opacity-50 border border-stone-200"
+      className="btn-quiet btn-sm"
     >
       <Copy className="w-4 h-4" />
-      {loading ? 'Duplicazione...' : 'Duplica'}
+      {loading ? 'Duplicazione…' : 'Duplica'}
     </button>
   );
 }

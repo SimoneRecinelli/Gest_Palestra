@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Timer, Play, Pause, RotateCcw, ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { Plus, Play, Pause, RotateCcw, ChevronDown, Info, Link2 } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
+import Piatto from '@/app/components/Piatto';
+import { COLORI_GRUPPO } from '@/app/components/gruppi';
 
 export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }) {
   const [nota, setNota] = useState(esercizio.nota_atleta || '');
@@ -10,19 +12,17 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
   const [peso, setPeso] = useState('');
   const [ripetizioniFatte, setRipetizioniFatte] = useState('');
   const [registrando, setRegistrando] = useState(false);
-  
+
   // Stato per l'apertura/chiusura della card (Fisarmonica)
   const [isExpanded, setIsExpanded] = useState(true); // Di default aperto
 
-
-  // --- 2. AGGIUNGI QUESTO EFFETTO QUI ---
   // Ascolta i pulsanti "Espandi/Comprimi tutti"
   useEffect(() => {
     if (espansioneGlobale && espansioneGlobale.ts > 0) {
       setIsExpanded(espansioneGlobale.stato);
     }
   }, [espansioneGlobale]);
-  
+
   const router = useRouter();
 
   // Funzione per calcolare i secondi iniziali dal testo (es. "1'30" -> 90)
@@ -38,7 +38,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
     return parseInt(t) || 90;
   };
 
-  // Stati per il Nuovo Timer Manuale
+  // Stati per il Timer Manuale
   const tempoIniziale = calcolaSecondiRecupero(esercizio.recupero);
   const [timeLeft, setTimeLeft] = useState(tempoIniziale);
   const [isRunning, setIsRunning] = useState(false);
@@ -102,83 +102,104 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
     return url;
   };
 
-  const datiGrafico = esercizio.pesi ? [...esercizio.pesi].reverse().map(p => ({
-    data: new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
-    peso: parseFloat(p.peso_kg) || 0
-  })) : [];
+  const datiGrafico = esercizio.pesi
+    ? [...esercizio.pesi].reverse().map((p) => ({
+        data: new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
+        peso: parseFloat(p.peso_kg) || 0,
+      }))
+    : [];
+
+  const coloreGruppo = COLORI_GRUPPO[esercizio.gruppo_muscolare] || '#5C6169';
+  const timerFinito = timeLeft === 0;
+  const progressoTimer = tempoIniziale > 0 ? (timeLeft / tempoIniziale) * 100 : 0;
+
+  // Riga di sintesi, visibile quando la card è chiusa
+  const sintesi = [
+    esercizio.serie && esercizio.ripetizioni
+      ? `${esercizio.serie} × ${esercizio.ripetizioni}`
+      : esercizio.serie || esercizio.ripetizioni,
+    esercizio.recupero ? `rec. ${esercizio.recupero}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
-    <div className={`bg-card border border-border rounded-lg mb-4 shadow-sm relative overflow-hidden transition-all ${esercizio.is_superset ? 'border-b-2 border-b-accent bg-amber-50/20' : ''} border-l-4 border-l-accent`}>
-      
-      {/* HEADER CARD - CLICCABILE PER APRIRE/CHIUDERE */}
-      <div 
-        className="p-4 sm:p-5 cursor-pointer hover:bg-stone-50 transition-colors flex justify-between items-center"
+    <div
+      className={`card mb-3 overflow-hidden ${
+        esercizio.is_superset ? 'border-l-[6px] border-l-signal' : ''
+      }`}
+    >
+      {/* Intestazione: tocca per aprire o chiudere */}
+      <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
+        aria-expanded={isExpanded}
+        className="w-full flex items-center gap-3 pl-5 pr-3 py-4 min-h-[68px] text-left active:bg-white"
       >
-        <div className="pr-3">
+        <div className="flex-1 min-w-0">
           {esercizio.is_superset && (
-            <span className="text-[10px] font-bold uppercase tracking-wider bg-stone-900 text-amber-400 px-2 py-1 rounded mb-2 inline-block shadow-sm">
-              ⚡ Superset (collegato al successivo)
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold bg-rubber text-white pl-2 pr-2.5 py-1 rounded-full mb-2">
+              <Link2 className="w-3.5 h-3.5 text-tape" strokeWidth={2.5} />
+              Superset col prossimo
             </span>
           )}
-          <h3 className="font-display font-semibold text-xl">{esercizio.nome}</h3>
+          <h3 className="font-display font-bold text-[27px] leading-[1.05] tracking-wide break-words">
+            {esercizio.nome}
+          </h3>
+          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1.5 text-sm">
+            {esercizio.gruppo_muscolare && (
+              <span className="inline-flex items-center gap-1.5 font-semibold text-steel">
+                <Piatto colore={coloreGruppo} size={14} />
+                {esercizio.gruppo_muscolare}
+              </span>
+            )}
+            {!isExpanded && sintesi && <span className="text-steel">{sintesi}</span>}
+          </div>
         </div>
-        
-        {/* IL BADGE DEL GRUPPO MUSCOLARE E LA FRECCIA */}
-        <div className="flex items-center gap-3 shrink-0">
-          
-          {esercizio.gruppo_muscolare && (
-            <span className="text-[10px] font-bold uppercase tracking-widest bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full border border-emerald-200 shadow-sm">
-              {esercizio.gruppo_muscolare}
-            </span>
-          )}
-          
-          <button className="text-stone-400 hover:text-stone-700 bg-stone-100 p-2 rounded-full shrink-0">
-            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
+        <ChevronDown
+          className={`w-6 h-6 text-steel shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-      {/* CONTENUTO DELLA CARD (VISIBILE SOLO SE EXPANDED) */}
       {isExpanded && (
-        <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-4 border-t border-stone-100">
-
-          <div className="grid grid-cols-3 divide-x divide-border border border-border rounded bg-white/60 mb-4 shadow-sm">
-            <div className="text-center py-2">
-              <p className="font-display font-semibold text-lg sm:text-xl leading-none">{esercizio.serie ?? '—'}</p>
-              <p className="text-[10px] sm:text-xs uppercase tracking-wide text-inkmuted mt-1">serie</p>
-            </div>
-            <div className="text-center py-2">
-              <p className="font-display font-semibold text-lg sm:text-xl leading-none">{esercizio.ripetizioni ?? '—'}</p>
-              <p className="text-[10px] sm:text-xs uppercase tracking-wide text-inkmuted mt-1">ripetizioni</p>
-            </div>
-            <div className="text-center py-2">
-              <p className="font-display font-semibold text-lg sm:text-xl leading-none">{esercizio.recupero ?? '—'}</p>
-              <p className="text-[10px] sm:text-xs uppercase tracking-wide text-inkmuted mt-1">recupero</p>
-            </div>
+        <div className="px-5 pb-5 apri">
+          {/* Il programma dell'esercizio, a lettere grandi */}
+          <div className="grid grid-cols-3 divide-x divide-line border-y border-line py-3 -mx-5 mb-4">
+            {[
+              [esercizio.serie, 'serie'],
+              [esercizio.ripetizioni, 'ripetizioni'],
+              [esercizio.recupero, 'recupero'],
+            ].map(([valore, etichetta]) => (
+              <div key={etichetta} className="text-center px-1">
+                <p className="font-display font-bold text-[40px] leading-none tracking-wide">
+                  {valore || '—'}
+                </p>
+                <p className="text-[13px] text-steel mt-1">{etichetta}</p>
+              </div>
+            ))}
           </div>
 
-          {/* BOX NOTE PT IN RISALTO */}
+          {/* Istruzioni del PT: nastro giallo, la prima cosa da leggere */}
           {esercizio.note_pt && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm">
-              <span className="flex items-center gap-1.5 text-xs font-bold text-blue-800 uppercase tracking-wider mb-1">
-                <Info className="w-4 h-4" /> Istruzioni del PT:
-              </span>
-              <p className="text-sm text-blue-900 font-medium">{esercizio.note_pt}</p>
+            <div className="mb-4 p-4 bg-tape text-rubber rounded-[12px]">
+              <p className="flex items-center gap-1.5 font-bold mb-1">
+                <Info className="w-[18px] h-[18px]" strokeWidth={2.5} /> Istruzioni del PT
+              </p>
+              <p className="text-base font-medium leading-snug">{esercizio.note_pt}</p>
             </div>
           )}
 
           {esercizio.nota_atleta && (
-            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
-              <span className="block text-xs font-bold text-yellow-800 uppercase tracking-wider mb-1">📝 Nota di Simone:</span>
-              <p className="text-sm text-yellow-900">{esercizio.nota_atleta}</p>
+            <div className="mb-4 p-4 bg-white border border-line border-l-4 border-l-plate-blue rounded-[12px]">
+              <p className="text-[13px] font-semibold text-steel mb-1">Nota di Simone</p>
+              <p className="text-base leading-snug">{esercizio.nota_atleta}</p>
             </div>
           )}
 
           {esercizio.video_url && (
-            <div className="w-full mb-5 relative pt-[56.25%] bg-black rounded overflow-hidden shadow-sm">
-              <iframe 
-                src={getEmbedUrl(esercizio.video_url)} 
+            <div className="w-full mb-5 relative pt-[56.25%] bg-black rounded-[12px] overflow-hidden">
+              <iframe
+                src={getEmbedUrl(esercizio.video_url)}
                 className="absolute top-0 left-0 w-full h-full"
                 allowFullScreen
                 title={`Video ${esercizio.nome}`}
@@ -186,71 +207,148 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
             </div>
           )}
 
-          <div className="border-t border-border pt-4">
-            <p className="text-sm font-bold text-inkmuted uppercase tracking-wide mb-3">Diario pesi</p>
+          {/* Diario pesi */}
+          <div>
+            <h4 className="font-bold mb-2">Diario pesi</h4>
             {esercizio.pesi && esercizio.pesi.length > 0 ? (
-              <ul className="space-y-2 mb-4">
+              <ul className="mb-4 divide-y divide-line border-y border-line">
                 {esercizio.pesi.map((p, i) => (
-                  <li key={p.id} className={`flex items-center justify-between text-sm p-2 rounded ${i === 0 ? 'bg-stone-50 border border-stone-100 font-medium' : 'text-inkmuted'}`}>
-                    <span>
-                      <span className={`font-display ${i === 0 ? 'text-stone-900 font-bold' : ''}`}>{p.peso_kg ?? '—'} kg</span>
-                      {p.ripetizioni_fatte && <span> × {p.ripetizioni_fatte}</span>}
+                  <li key={p.id} className="flex items-baseline justify-between py-2.5">
+                    <span className={i === 0 ? 'text-rubber' : 'text-steel'}>
+                      <span
+                        className={`font-display font-bold tracking-wide ${
+                          i === 0 ? 'text-[32px]' : 'text-[22px]'
+                        }`}
+                      >
+                        {p.peso_kg ?? '—'}
+                      </span>
+                      <span className="text-sm font-semibold ml-1">kg</span>
+                      {p.ripetizioni_fatte && (
+                        <span className="text-[17px] font-semibold ml-2">× {p.ripetizioni_fatte}</span>
+                      )}
                     </span>
-                    <span className="text-xs">{new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}</span>
+                    <span className="text-sm text-steel">
+                      {new Date(p.data).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' })}
+                    </span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-inkmuted mb-4">Ancora nessuna serie registrata.</p>
+              <p className="text-steel mb-4">Ancora nessuna serie registrata.</p>
             )}
 
             {isAtleta && (
-              <form onSubmit={registraSerie} className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
-                <input type="number" step="0.5" placeholder="kg" value={peso} onChange={(e) => setPeso(e.target.value)} className="w-[80px] sm:w-20 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent" />
-                <input type="text" placeholder="reps" value={ripetizioniFatte} onChange={(e) => setRipetizioniFatte(e.target.value)} className="w-[90px] sm:w-24 px-2 py-2 sm:py-1.5 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent" />
-                <button type="submit" disabled={registrando} className="flex-1 sm:flex-none flex justify-center items-center gap-1 bg-stone-900 hover:bg-stone-800 text-white text-base sm:text-sm font-medium px-4 py-2 sm:py-1.5 rounded transition-colors disabled:opacity-60">
-                  <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" strokeWidth={2.5} /> Salva
+              <form onSubmit={registraSerie} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-end">
+                <div>
+                  <label htmlFor={`kg-${esercizio.id}`} className="field-label">Kg</label>
+                  <input
+                    id={`kg-${esercizio.id}`}
+                    type="number"
+                    inputMode="decimal"
+                    step="0.5"
+                    placeholder="0"
+                    value={peso}
+                    onChange={(e) => setPeso(e.target.value)}
+                    className="field"
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`reps-${esercizio.id}`} className="field-label">Ripetizioni</label>
+                  <input
+                    id={`reps-${esercizio.id}`}
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="0"
+                    value={ripetizioniFatte}
+                    onChange={(e) => setRipetizioniFatte(e.target.value)}
+                    className="field"
+                  />
+                </div>
+                <button type="submit" disabled={registrando} className="btn-primary">
+                  <Plus className="w-5 h-5" strokeWidth={2.5} />
+                  Salva
                 </button>
               </form>
             )}
           </div>
 
-          {/* NUOVO TIMER CON PULSANTIERA PLAY/STOP/RESET */}
+          {/* Timer di recupero: l'elemento più grande della scheda */}
           {isAtleta && (
-            <div className="mt-5 p-3 sm:p-4 bg-stone-100 rounded-xl flex items-center justify-between border border-stone-200 shadow-inner">
-              <div className="flex items-center gap-3">
-                <Timer className={`w-6 h-6 ${isRunning ? 'text-accent animate-pulse' : 'text-stone-400'}`} />
-                <span className="font-display font-bold text-3xl tracking-tight text-stone-800 w-[70px]">
-                  {formatTime(timeLeft)}
-                </span>
+            <div className="mt-5 bg-rubber text-white rounded-[14px] p-4 pb-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p
+                    className={`font-display font-extrabold text-[64px] leading-none tracking-wide ${
+                      timerFinito ? 'text-[#FF6A5C]' : ''
+                    }`}
+                    aria-label={`Recupero: ${formatTime(timeLeft)}`}
+                  >
+                    {formatTime(timeLeft)}
+                  </p>
+                  <p className="text-sm text-white/60 mt-1">
+                    {timerFinito ? 'Recupero finito, si riparte' : isRunning ? 'In recupero' : 'Recupero'}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={toggleTimer}
+                    aria-label={isRunning ? 'Pausa' : 'Avvia recupero'}
+                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                      isRunning ? 'bg-white text-rubber' : 'bg-signal text-white active:bg-signaldark'
+                    }`}
+                  >
+                    {isRunning ? (
+                      <Pause className="w-7 h-7 fill-current" />
+                    ) : (
+                      <Play className="w-7 h-7 fill-current ml-1" />
+                    )}
+                  </button>
+                  <button
+                    onClick={resetTimer}
+                    aria-label="Azzera timer"
+                    className="w-12 h-12 rounded-full flex items-center justify-center bg-white/10 active:bg-white/20"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <button 
-                  onClick={toggleTimer} 
-                  className={`flex items-center justify-center w-12 h-12 rounded-full shadow-sm transition-all ${isRunning ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-white text-stone-700 hover:text-accent hover:bg-stone-50'}`}
-                >
-                  {isRunning ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-1" />}
-                </button>
-                <button 
-                  onClick={resetTimer} 
-                  className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-sm text-stone-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
+              {/* La barra si svuota di secondo in secondo */}
+              <div className="mt-4 h-1.5 rounded-full bg-white/15 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-signal transition-[width] duration-1000 ease-linear"
+                  style={{ width: `${progressoTimer}%` }}
+                />
               </div>
             </div>
           )}
 
-          {/* GRAFICO TREND CARICHI */}
+          {/* Andamento dei carichi */}
           {esercizio.pesi && esercizio.pesi.length > 1 && (
-            <div className="mt-5 pt-4 border-t border-stone-100">
-              <p className="text-[10px] uppercase font-bold tracking-widest text-stone-400 mb-2">Trend di Carico</p>
-              <div className="h-24 w-full">
+            <div className="mt-5">
+              <h4 className="font-bold mb-2">Andamento dei carichi</h4>
+              <div className="h-28 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={datiGrafico}>
+                  <LineChart data={datiGrafico} margin={{ top: 8, right: 8, bottom: 4, left: 8 }}>
                     <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '12px' }} labelStyle={{ display: 'none' }} itemStyle={{ color: '#1c1917', fontWeight: 'bold' }} />
-                    <Line type="monotone" dataKey="peso" name="Kg" stroke="#1c1917" strokeWidth={3} dot={{ r: 4, fill: '#1c1917', strokeWidth: 0 }} activeDot={{ r: 6 }} />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: '10px',
+                        border: '1px solid #CFD1CA',
+                        boxShadow: 'none',
+                        fontSize: '14px',
+                      }}
+                      labelStyle={{ display: 'none' }}
+                      itemStyle={{ color: '#15171A', fontWeight: 'bold' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="peso"
+                      name="Kg"
+                      stroke="#15171A"
+                      strokeWidth={3}
+                      dot={{ r: 4, fill: '#D42B1E', strokeWidth: 0 }}
+                      activeDot={{ r: 7, fill: '#D42B1E' }}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
@@ -258,14 +356,23 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
           )}
 
           {isAtleta && (
-            <div className="border-t border-border pt-4 mt-4">
-              <textarea value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Le tue note, sensazioni, aggiustamenti..." rows={2} className="w-full px-3 py-2 bg-white border border-border rounded text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-accent placeholder-stone-400" />
-              <button onClick={salvaNota} disabled={salvataggioNota} className="mt-2 text-sm text-accent hover:text-accentdark font-semibold disabled:opacity-60 flex justify-end w-full">
-                {salvataggioNota ? 'Salvataggio...' : 'Salva nota'}
-              </button>
+            <div className="mt-5 pt-4 border-t border-line">
+              <label htmlFor={`nota-${esercizio.id}`} className="field-label">Le tue note</label>
+              <textarea
+                id={`nota-${esercizio.id}`}
+                value={nota}
+                onChange={(e) => setNota(e.target.value)}
+                placeholder="Sensazioni, aggiustamenti, cosa cambieresti"
+                rows={2}
+                className="field"
+              />
+              <div className="flex justify-end mt-2">
+                <button onClick={salvaNota} disabled={salvataggioNota} className="btn-quiet btn-sm">
+                  {salvataggioNota ? 'Salvataggio…' : 'Salva nota'}
+                </button>
+              </div>
             </div>
           )}
-
         </div>
       )}
     </div>

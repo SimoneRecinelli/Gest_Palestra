@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 export default function AggiungiEsercizio({ giornoId }) {
   const router = useRouter();
@@ -18,8 +19,13 @@ export default function AggiungiEsercizio({ giornoId }) {
   };
 
   return (
-    <button onClick={handleAdd} disabled={loading} className="w-full py-3 border-2 border-dashed border-stone-300 text-stone-500 rounded-xl hover:bg-stone-50 hover:text-stone-700 hover:border-stone-400 transition-all font-medium text-sm">
-      {loading ? 'Aggiungendo...' : '+ Aggiungi Esercizio in questo giorno'}
+    <button
+      onClick={handleAdd}
+      disabled={loading}
+      className="w-full min-h-[56px] flex items-center justify-center gap-2 border-2 border-dashed border-steel/50 text-steel rounded-card font-semibold active:bg-white disabled:opacity-50"
+    >
+      <Plus className="w-5 h-5" strokeWidth={2.5} />
+      {loading ? 'Aggiunta in corso…' : 'Aggiungi esercizio a questa seduta'}
     </button>
   );
 }

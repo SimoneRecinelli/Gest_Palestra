@@ -2,15 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+/* ---------- Base: pensata per iPhone in modalità app ---------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    background: #15171a; /* se si tira oltre il bordo, si vede la gomma e non il bianco */
+  }
+  body {
+    @apply bg-chalk text-rubber font-sans antialiased;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 3px solid #1f5fbf;
+    outline-offset: 2px;
+  }
+  /* 16px sugli input evita lo zoom automatico di Safari */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
 }
 
-body {
-  -webkit-font-smoothing: antialiased;
+/* ---------- Componenti riusati in tutta l'app ---------- */
+@layer components {
+  .field-label {
+    @apply block text-[13px] font-semibold text-steel mb-1.5;
+  }
+  .field {
+    @apply w-full min-h-tap px-3.5 py-2.5 bg-white border border-line rounded-[10px] text-rubber placeholder:text-steel/60;
+    @apply focus:outline-none focus:border-rubber focus:ring-2 focus:ring-rubber/15;
+  }
+  select.field {
+    @apply pr-9;
+  }
+  textarea.field {
+    @apply resize-none leading-snug;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 min-h-tap px-5 rounded-[12px] font-semibold text-[15px];
+    @apply transition-colors disabled:opacity-50 disabled:pointer-events-none select-none;
+  }
+  .btn-primary {
+    @apply btn bg-signal text-white active:bg-signaldark;
+  }
+  .btn-dark {
+    @apply btn bg-rubber text-white active:bg-rubber2;
+  }
+  .btn-quiet {
+    @apply btn bg-transparent text-rubber border border-line active:bg-black/5;
+  }
+  .btn-danger {
+    @apply btn bg-transparent text-signaldark active:bg-signal/10;
+  }
+  .btn-sm {
+    @apply min-h-[40px] px-3.5 text-sm rounded-[10px];
+  }
+
+  .card {
+    @apply bg-surface border border-line rounded-card;
+  }
 }
 
-/* Un'unica transizione deliberata: una nuova riga nel diario pesi che compare */
+/* ---------- Movimento ---------- */
+/* Un'unica cosa si muove da sola: la barra del timer di recupero.
+   Il resto risponde solo a un tocco. */
 @keyframes riga-nuova {
   from {
     opacity: 0;
@@ -23,4 +83,37 @@ body {
 }
 .riga-nuova {
   animation: riga-nuova 0.25s ease-out;
+}
+
+@keyframes apri {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.apri {
+  animation: apri 0.2s ease-out;
+}
+
+/* Barra seduta: scorre di lato senza mostrare la scrollbar */
+.nascondi-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nascondi-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .riga-nuova,
+  .apri {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -14,79 +14,84 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
-    const res = await signIn('credentials', { 
-      redirect: false, 
-      email, 
-      password 
+
+    const res = await signIn('credentials', {
+      redirect: false,
+      email,
+      password,
     });
-    
+
     if (res?.error) {
       setError('Email o password errate.');
       setLoading(false);
     } else {
-      router.push('/dashboard'); 
+      router.push('/dashboard');
       router.refresh();
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center mt-16 sm:mt-24 px-4">
-      {/* Intestazione Brand */}
-      <div className="mb-10 text-center">
-        <h1 className="font-display font-bold text-4xl tracking-tight text-stone-900 font-['Oswald'] uppercase mb-2">
-          Gestionale Palestra
-        </h1>
-        <p className="text-stone-500 text-sm font-medium">
-          Accedi al tuo diario di allenamento
-        </p>
-      </div>
+    // Sfondo scuro a tutto schermo, anche sotto notch e barra Home
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-rubber text-white">
+      <div className="min-h-full flex flex-col px-6 pt-[calc(env(safe-area-inset-top)+2.5rem)] pb-[calc(env(safe-area-inset-bottom)+2rem)] max-w-md mx-auto">
+        {/* Il disco visto di fronte, a grandezza di schermo: l'unico elemento che alza la voce */}
+        <div className="flex-1 flex flex-col items-center justify-center py-6">
+          <svg viewBox="0 0 240 240" className="w-44 h-44 sm:w-52 sm:h-52" aria-hidden="true">
+            <circle cx="120" cy="120" r="116" fill="#D42B1E" />
+            <circle cx="120" cy="120" r="96" fill="none" stroke="#AE2016" strokeWidth="3" />
+            <circle cx="120" cy="120" r="64" fill="none" stroke="#AE2016" strokeWidth="3" />
+            <circle cx="120" cy="120" r="36" fill="#FAFAF7" />
+            <circle cx="120" cy="120" r="15" fill="#15171A" />
+          </svg>
+          <h1 className="font-display font-extrabold text-[44px] leading-none tracking-wide mt-8">
+            Gestionale Palestra
+          </h1>
+          <p className="text-white/60 mt-2">Il diario della tua scheda</p>
+        </div>
 
-      {/* Form di Login Moderno */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-stone-200/50 border border-stone-100 p-8">
-        <h2 className="text-2xl font-bold text-stone-800 mb-6">Accedi</h2>
+        <form onSubmit={handleLogin} className="space-y-4">
+          {error && (
+            <div role="alert" className="p-3 bg-signal/15 border border-signal/60 text-[#FFB4AC] text-sm rounded-[10px] font-medium">
+              {error}
+            </div>
+          )}
 
-        {error && (
-          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg font-medium">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleLogin} className="space-y-5">
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+            <label htmlFor="email" className="block text-[13px] font-semibold text-white/70 mb-1.5">
               Email
             </label>
             <input
+              id="email"
               type="email"
+              inputMode="email"
+              autoComplete="username"
+              autoCapitalize="none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all placeholder-stone-400"
-              placeholder="Inserisci la tua email"
+              className="field !bg-rubber2 !border-white/15 !text-white placeholder:!text-white/35 focus:!border-white focus:!ring-white/20"
+              placeholder="nome@esempio.it"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+            <label htmlFor="password" className="block text-[13px] font-semibold text-white/70 mb-1.5">
               Password
             </label>
             <input
+              id="password"
               type="password"
+              autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-stone-900 text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-stone-900 focus:bg-white transition-all placeholder-stone-400"
+              className="field !bg-rubber2 !border-white/15 !text-white placeholder:!text-white/35 focus:!border-white focus:!ring-white/20"
               placeholder="••••••••"
               required
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-sm font-bold transition-colors shadow-md disabled:opacity-70 mt-4"
-          >
-            {loading ? 'Accesso in corso...' : 'Entra'}
+          <button type="submit" disabled={loading} className="btn-primary w-full !min-h-[52px] text-base mt-2">
+            {loading ? 'Accesso in corso…' : 'Entra'}
           </button>
         </form>
       </div>

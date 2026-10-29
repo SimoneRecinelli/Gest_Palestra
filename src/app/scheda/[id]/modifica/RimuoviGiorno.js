@@ -1,6 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 export default function RimuoviGiorno({ giornoId, nomeGiorno }) {
   const router = useRouter();
@@ -15,12 +16,9 @@ export default function RimuoviGiorno({ giornoId, nomeGiorno }) {
   };
 
   return (
-    <button 
-      onClick={handleDelete} 
-      disabled={loading} 
-      className="text-red-600 hover:text-red-800 text-sm font-semibold transition-colors"
-    >
-      {loading ? 'Eliminazione...' : '🗑 Rimuovi Giorno'}
+    <button onClick={handleDelete} disabled={loading} className="btn-danger btn-sm shrink-0">
+      <Trash2 className="w-4 h-4" />
+      {loading ? 'Eliminazione…' : 'Elimina seduta'}
     </button>
   );
 }

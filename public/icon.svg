@@ -1,17 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Sfondo con i colori del brand (Stone scuro) e angoli arrotondati stile iOS -->
-  <rect width="512" height="512" rx="112" fill="#1c1917" />
-  
-  <!-- Dettaglio anello esterno del disco da 20kg -->
-  <circle cx="256" cy="256" r="160" fill="none" stroke="#f5f2eb" stroke-width="24" opacity="0.2" />
-  
-  <!-- Impugnatura centrale / Bilanciere -->
-  <rect x="136" y="232" width="240" height="48" rx="12" fill="#f5f2eb" />
-  
-  <!-- Dischi laterali stilizzati -->
-  <rect x="112" y="140" width="48" height="232" rx="16" fill="#f5f2eb" />
-  <rect x="352" y="140" width="48" height="232" rx="16" fill="#f5f2eb" />
-  
-  <!-- Foro centrale del bilanciere -->
-  <circle cx="256" cy="256" r="20" fill="#1c1917" />
+  <!-- Gomma del pavimento -->
+  <rect width="512" height="512" fill="#15171A" />
+  <!-- Disco da 25 kg visto di fronte -->
+  <circle cx="256" cy="256" r="200" fill="#D42B1E" />
+  <circle cx="256" cy="256" r="166" fill="none" stroke="#AE2016" stroke-width="8" />
+  <circle cx="256" cy="256" r="112" fill="none" stroke="#AE2016" stroke-width="8" />
+  <circle cx="256" cy="256" r="64" fill="#FAFAF7" />
+  <circle cx="256" cy="256" r="26" fill="#15171A" />
 </svg>

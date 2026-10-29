@@ -31,51 +31,60 @@ export default function NuovaSchedaForm() {
 
   if (!aperto) {
     return (
-      <button
-        onClick={() => setAperto(true)}
-        className="flex items-center gap-2 text-accent font-medium hover:text-accentdark mt-2"
-      >
-        <Plus className="w-4 h-4" strokeWidth={2.5} />
+      <button onClick={() => setAperto(true)} className="btn-dark w-full mt-5">
+        <Plus className="w-5 h-5" strokeWidth={2.5} />
         Nuova scheda
       </button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-5 mt-2 max-w-sm relative">
-      <button type="button" onClick={() => setAperto(false)} className="absolute top-4 right-4 text-inkmuted hover:text-ink">
-        <X className="w-4 h-4" />
-      </button>
-      <h3 className="font-display font-semibold text-lg mb-4">Nuova scheda</h3>
-      <div className="space-y-3">
+    <form onSubmit={handleSubmit} className="card p-5 mt-5 apri">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-display font-bold text-2xl tracking-wide">Nuova scheda</h2>
+        <button
+          type="button"
+          onClick={() => setAperto(false)}
+          aria-label="Chiudi"
+          className="w-11 h-11 -mr-2 flex items-center justify-center rounded-full text-steel active:bg-black/5"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+      <div className="space-y-4">
         <div>
-          <label className="block text-sm text-inkmuted mb-1">Titolo</label>
+          <label htmlFor="titolo-scheda" className="field-label">Titolo</label>
           <input
+            id="titolo-scheda"
             placeholder="Scheda Forza — Ottobre"
             value={titolo}
             onChange={(e) => setTitolo(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-white border border-border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            className="field"
           />
         </div>
         <div>
-          <label className="block text-sm text-inkmuted mb-1">Email dell'atleta</label>
+          <label htmlFor="email-atleta" className="field-label">Email dell'atleta</label>
           <input
+            id="email-atleta"
+            type="email"
+            inputMode="email"
+            autoCapitalize="none"
             placeholder="atleta già registrato"
             value={atletaEmail}
             onChange={(e) => setAtletaEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 bg-white border border-border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            className="field"
           />
         </div>
       </div>
-      {errore && <p className="text-sm text-red-700 mt-3">{errore}</p>}
-      <button
-        type="submit"
-        disabled={caricamento}
-        className="mt-4 bg-accent hover:bg-accentdark text-white font-medium px-4 py-2 rounded transition-colors disabled:opacity-60"
-      >
-        {caricamento ? 'Creazione...' : 'Crea scheda'}
+      {errore && (
+        <p role="alert" className="text-sm font-medium text-signaldark mt-3">
+          {errore}
+        </p>
+      )}
+      <button type="submit" disabled={caricamento} className="btn-primary w-full mt-5">
+        {caricamento ? 'Creazione…' : 'Crea scheda'}
       </button>
     </form>
   );

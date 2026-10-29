@@ -24,7 +24,7 @@ export default function NuovoGiornoForm({ schedaId }) {
     return (
       <button
         onClick={() => setAperto(true)}
-        className="flex items-center gap-1.5 text-accent font-medium hover:text-accentdark text-sm whitespace-nowrap px-3 py-2"
+        className="flex items-center gap-1.5 min-h-[44px] px-4 rounded-full border border-dashed border-steel/60 text-steel font-semibold text-[15px] whitespace-nowrap active:bg-white"
       >
         <Plus className="w-4 h-4" strokeWidth={2.5} />
         Seduta
@@ -33,16 +33,17 @@ export default function NuovoGiornoForm({ schedaId }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 px-1 py-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 shrink-0">
       <input
+        aria-label="Nome della seduta"
         placeholder="Nome seduta"
         value={nome}
         onChange={(e) => setNome(e.target.value)}
         required
         autoFocus
-        className="px-2 py-1.5 bg-white border border-border rounded text-sm focus:outline-none focus:ring-2 focus:ring-accent w-32"
+        className="field !min-h-[44px] !py-1.5 !rounded-full w-40"
       />
-      <button type="submit" className="text-accent font-medium text-sm hover:text-accentdark">
+      <button type="submit" className="btn-primary btn-sm !min-h-[44px] !rounded-full">
         Aggiungi
       </button>
     </form>

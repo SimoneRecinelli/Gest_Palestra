@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Link2 } from 'lucide-react';
+import { GRUPPI } from '@/app/components/gruppi';
 
 export default function ModificaEsercizio({ esercizio }) {
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function ModificaEsercizio({ esercizio }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
     });
-    if (res.ok) { setMsg('Salvato! ✅'); router.refresh(); } 
+    if (res.ok) { setMsg('Salvato'); router.refresh(); } 
     else setMsg('Errore');
     setLoading(false);
     setTimeout(() => setMsg(''), 3000);
@@ -43,84 +45,77 @@ export default function ModificaEsercizio({ esercizio }) {
     router.refresh();
   };
 
+  const id = esercizio.id;
   return (
-    <div className="bg-white p-5 rounded-xl shadow-sm border border-stone-200 mb-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-        
-        {/* NOME ESERCIZIO */}
-        <div className="col-span-1 md:col-span-2">
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Nome Esercizio</label>
-          <input type="text" name="nome" value={formData.nome} onChange={handleChange} className="w-full border rounded-md p-2" />
+    <div className={`card p-5 mb-3 ${formData.is_superset ? 'border-l-[6px] border-l-signal' : ''}`}>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+        <div className="sm:col-span-2">
+          <label htmlFor={`nome-${id}`} className="field-label">Nome esercizio</label>
+          <input id={`nome-${id}`} type="text" name="nome" value={formData.nome} onChange={handleChange} className="field" />
         </div>
 
-        {/* TENDINA GRUPPO MUSCOLARE */}
-        <div className="col-span-1 md:col-span-1">
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Gruppo Musc.</label>
-          <select 
-            name="gruppo_muscolare" 
-            value={formData.gruppo_muscolare} 
-            onChange={handleChange} 
-            className="w-full border rounded-md p-2 bg-white"
-          >
+        <div>
+          <label htmlFor={`gruppo-${id}`} className="field-label">Gruppo muscolare</label>
+          <select id={`gruppo-${id}`} name="gruppo_muscolare" value={formData.gruppo_muscolare} onChange={handleChange} className="field">
             <option value="">Nessuno</option>
-            <option value="Petto">Petto</option>
-            <option value="Dorso">Dorso</option>
-            <option value="Gambe">Gambe</option>
-            <option value="Spalle">Spalle</option>
-            <option value="Bicipiti">Bicipiti</option>
-            <option value="Tricipiti">Tricipiti</option>
-            <option value="Addome">Addome</option>
+            {GRUPPI.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
           </select>
         </div>
 
-        {/* ORDINE */}
-        <div className="col-span-1 md:col-span-1">
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Ordine (N°)</label>
-          <input type="number" name="ordine" value={formData.ordine} onChange={handleChange} className="w-full border rounded-md p-2" />
+        <div>
+          <label htmlFor={`ordine-${id}`} className="field-label">Posizione</label>
+          <input id={`ordine-${id}`} type="number" inputMode="numeric" name="ordine" value={formData.ordine} onChange={handleChange} className="field" />
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Serie</label>
-          <input type="number" name="serie" value={formData.serie} onChange={handleChange} className="w-full border rounded-md p-2" />
+          <label htmlFor={`serie-${id}`} className="field-label">Serie</label>
+          <input id={`serie-${id}`} type="number" inputMode="numeric" name="serie" value={formData.serie} onChange={handleChange} className="field" />
         </div>
         <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Ripetizioni</label>
-          <input type="text" name="ripetizioni" value={formData.ripetizioni} onChange={handleChange} className="w-full border rounded-md p-2" />
+          <label htmlFor={`rip-${id}`} className="field-label">Ripetizioni</label>
+          <input id={`rip-${id}`} type="text" name="ripetizioni" value={formData.ripetizioni} onChange={handleChange} className="field" />
         </div>
-        <div>
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Recupero</label>
-          <input type="text" name="recupero" value={formData.recupero} onChange={handleChange} className="w-full border rounded-md p-2" />
-        </div>
-        
-        <div className="col-span-1 md:col-span-4">
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Link Video (YouTube)</label>
-          <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} placeholder="https://..." className="w-full border rounded-md p-2" />
-        </div>
-        
-        <div className="col-span-1 md:col-span-4">
-          <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Istruzioni (Note PT)</label>
-          <textarea name="note_pt" value={formData.note_pt} onChange={handleChange} placeholder="Es: Schiena dritta, focus in negativa..." className="w-full border rounded-md p-2 h-20 resize-none"></textarea>
+        <div className="sm:col-span-2">
+          <label htmlFor={`rec-${id}`} className="field-label">Recupero</label>
+          <input id={`rec-${id}`} type="text" name="recupero" value={formData.recupero} onChange={handleChange} className="field" />
         </div>
 
-        <div className="col-span-1 md:col-span-4 flex items-center space-x-2 pt-2">
-          <input 
-            type="checkbox" 
-            id={`superset-${esercizio.id}`}
-            name="is_superset" 
-            checked={formData.is_superset} 
-            onChange={handleChange} 
-            className="w-4 h-4 text-stone-900 border-stone-300 rounded focus:ring-stone-900 cursor-pointer" 
+        <div className="sm:col-span-4">
+          <label htmlFor={`video-${id}`} className="field-label">Link video (YouTube)</label>
+          <input id={`video-${id}`} type="url" inputMode="url" autoCapitalize="none" name="video_url" value={formData.video_url} onChange={handleChange} placeholder="https://…" className="field" />
+        </div>
+
+        <div className="sm:col-span-4">
+          <label htmlFor={`note-${id}`} className="field-label">Istruzioni per l'atleta</label>
+          <textarea id={`note-${id}`} name="note_pt" value={formData.note_pt} onChange={handleChange} placeholder="Es: schiena dritta, fase negativa lenta" rows={3} className="field" />
+        </div>
+
+        <label htmlFor={`superset-${id}`} className="sm:col-span-4 flex items-center gap-3 min-h-tap cursor-pointer">
+          <input
+            type="checkbox"
+            id={`superset-${id}`}
+            name="is_superset"
+            checked={formData.is_superset}
+            onChange={handleChange}
+            className="w-6 h-6 rounded-md border-line accent-[#D42B1E] cursor-pointer"
           />
-          <label htmlFor={`superset-${esercizio.id}`} className="text-sm font-medium text-stone-700 cursor-pointer">
-            ⚡ In superset con l'esercizio successivo
-          </label>
-        </div>
+          <span className="flex items-center gap-1.5 font-semibold">
+            <Link2 className="w-4 h-4 text-signal" strokeWidth={2.5} />
+            Superset con l'esercizio successivo
+          </span>
+        </label>
       </div>
 
-      <div className="flex justify-end items-center space-x-3 mt-4 pt-4 border-t border-stone-100">
-        {msg && <span className="text-sm font-semibold text-green-600">{msg}</span>}
-        <button onClick={eliminaEsercizio} disabled={loading} className="text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-semibold">Rimuovi</button>
-        <button onClick={salvaModifiche} disabled={loading} className="bg-stone-900 text-white hover:bg-stone-800 px-5 py-2 rounded-lg text-sm font-semibold">Salva Modifiche</button>
+      <div className="flex justify-end items-center gap-2 pt-4 border-t border-line">
+        {msg && (
+          <span role="status" className={`text-sm font-semibold mr-auto ${msg === 'Errore' ? 'text-signaldark' : 'text-plate-green'}`}>
+            {msg}
+          </span>
+        )}
+        <button onClick={eliminaEsercizio} disabled={loading} className="btn-danger btn-sm">Rimuovi</button>
+        <button onClick={salvaModifiche} disabled={loading} className="btn-dark btn-sm">Salva modifiche</button>
       </div>
     </div>
   );

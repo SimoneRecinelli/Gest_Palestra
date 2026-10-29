@@ -3,7 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { query } from '@/lib/db';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Dumbbell, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import NuovaSchedaForm from './NuovaSchedaForm';
 
 export default async function Dashboard() {
@@ -25,35 +25,40 @@ export default async function Dashboard() {
       );
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      <div className="flex items-center gap-2 mb-8">
-        <Dumbbell className="w-5 h-5 text-accent" strokeWidth={2.5} />
-        <h1 className="font-display font-semibold text-2xl">
-          {isPt ? 'I tuoi atleti' : 'Le tue schede'}
-        </h1>
-      </div>
+    <div className="max-w-2xl mx-auto px-4 pt-6">
+      <h1 className="font-display font-extrabold text-[40px] leading-none tracking-wide mb-6">
+        {isPt ? 'I tuoi atleti' : 'Le tue schede'}
+      </h1>
 
       {schede.length === 0 && (
-        <p className="text-inkmuted mb-6">
-          {isPt ? 'Non hai ancora creato nessuna scheda.' : 'Il tuo PT non ha ancora caricato una scheda.'}
-        </p>
+        <div className="card p-6 mb-6">
+          <p className="font-semibold">Nessuna scheda ancora.</p>
+          <p className="text-steel mt-1">
+            {isPt
+              ? 'Crea la prima scheda qui sotto: serve l\'email di un atleta già registrato.'
+              : 'Quando il tuo PT ne carica una, la trovi qui.'}
+          </p>
+        </div>
       )}
 
-      <div className="space-y-3">
+      <ul className="space-y-3">
         {schede.map((s) => (
-          <Link
-            key={s.id}
-            href={`/scheda/${s.id}`}
-            className="flex items-center justify-between bg-card border border-border border-l-4 border-l-accent rounded-lg px-5 py-4 hover:border-l-accentdark transition-colors group"
-          >
-            <div>
-              <p className="font-display font-semibold text-lg leading-tight">{s.titolo}</p>
-              {isPt && <p className="text-sm text-inkmuted">{s.atleta_nome}</p>}
-            </div>
-            <ChevronRight className="w-5 h-5 text-inkmuted group-hover:text-accent transition-colors" />
-          </Link>
+          <li key={s.id}>
+            <Link
+              href={`/scheda/${s.id}`}
+              className="card flex items-center gap-4 pl-5 pr-4 py-5 min-h-[76px] active:bg-white active:border-rubber transition-colors"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-display font-bold text-[28px] leading-[1.05] tracking-wide break-words">
+                  {s.titolo}
+                </p>
+                {isPt && <p className="text-steel mt-1">{s.atleta_nome}</p>}
+              </div>
+              <ChevronRight className="w-6 h-6 text-steel shrink-0" />
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {isPt && <NuovaSchedaForm />}
     </div>
