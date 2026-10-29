@@ -99,6 +99,34 @@
   animation: apri 0.2s ease-out;
 }
 
+/* Cambio giorno con lo swipe: il nuovo giorno entra dal lato da cui si è trascinato */
+@keyframes da-destra {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes da-sinistra {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.entra-da-destra {
+  animation: da-destra 0.22s ease-out;
+}
+.entra-da-sinistra {
+  animation: da-sinistra 0.22s ease-out;
+}
+
 /* Barra seduta: scorre di lato senza mostrare la scrollbar */
 .nascondi-scrollbar {
   scrollbar-width: none;
@@ -110,7 +138,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .riga-nuova,
-  .apri {
+  .apri,
+  .entra-da-destra,
+  .entra-da-sinistra {
     animation: none;
   }
   * {

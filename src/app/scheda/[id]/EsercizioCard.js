@@ -359,7 +359,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
           {esercizio.pesi && esercizio.pesi.length > 1 && (
             <div className="mt-5">
               <h4 className="font-bold mb-2">Andamento dei carichi</h4>
-              <div className="h-28 w-full">
+              <div className="h-28 w-full" data-no-swipe>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={datiGrafico} margin={{ top: 8, right: 8, bottom: 4, left: 8 }}>
                     <YAxis domain={['dataMin - 2', 'dataMax + 2']} hide />
