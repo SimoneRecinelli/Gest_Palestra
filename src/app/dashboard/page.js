@@ -16,11 +16,11 @@ export default async function Dashboard() {
     ? await query(
         `SELECT s.id, s.titolo, u.nome AS atleta_nome
          FROM schede s JOIN utenti u ON u.id = s.atleta_id
-         WHERE s.pt_id = $1 ORDER BY s.creata_il DESC`,
+         WHERE s.pt_id = $1 ORDER BY s.id ASC`,
         [session.user.id]
       )
     : await query(
-        `SELECT id, titolo FROM schede WHERE atleta_id = $1 AND attiva = true ORDER BY creata_il DESC`,
+        `SELECT id, titolo FROM schede WHERE atleta_id = $1 AND attiva = true ORDER BY id ASC`,
         [session.user.id]
       );
 
