@@ -15,6 +15,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
 
   // Stato per l'apertura/chiusura della card (Fisarmonica)
   const [isExpanded, setIsExpanded] = useState(true); // Di default aperto
+  const [anteprimaKo, setAnteprimaKo] = useState(false);
 
   // Ascolta i pulsanti "Espandi/Comprimi tutti"
   useEffect(() => {
@@ -113,15 +114,19 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
   const timerFinito = timeLeft === 0;
   const progressoTimer = tempoIniziale > 0 ? (timeLeft / tempoIniziale) * 100 : 0;
 
-  // Riga di sintesi, visibile quando la card è chiusa
-  const sintesi = [
-    esercizio.serie && esercizio.ripetizioni
-      ? `${esercizio.serie} × ${esercizio.ripetizioni}`
-      : esercizio.serie || esercizio.ripetizioni,
-    esercizio.recupero ? `rec. ${esercizio.recupero}` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  // Anteprima: la miniatura del video YouTube, se c'è. Altrimenti il disco del gruppo muscolare.
+  const idVideo = esercizio.video_url?.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/
+  )?.[1];
+  const urlAnteprima = idVideo ? `https://i.ytimg.com/vi/${idVideo}/mqdefault.jpg` : null;
+  const eShort = /\/shorts\//.test(esercizio.video_url || '');
+
+  // Il programma in forma compatta, visibile quando la card è chiusa
+  const dati = [
+    [esercizio.serie, 'serie'],
+    [esercizio.ripetizioni, 'rip'],
+    [esercizio.recupero, 'rec'],
+  ].filter(([valore]) => valore);
 
   return (
     <div
@@ -134,27 +139,55 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
         aria-expanded={isExpanded}
-        className="w-full flex items-center gap-3 pl-5 pr-3 py-4 min-h-[68px] text-left active:bg-white"
+        className="w-full flex items-center gap-3.5 pl-4 pr-3 py-3.5 min-h-[68px] text-left active:bg-white"
       >
+        <div className="relative w-[76px] h-[76px] shrink-0 rounded-[12px] overflow-hidden bg-chalk">
+          {urlAnteprima && !anteprimaKo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={urlAnteprima}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onError={() => setAnteprimaKo(true)}
+              className={`w-full h-full object-cover ${eShort ? 'scale-[1.75]' : ''}`}
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ backgroundColor: `${coloreGruppo}22` }}
+            >
+              <Piatto colore={coloreGruppo} size={34} />
+            </div>
+          )}
+        </div>
+
         <div className="flex-1 min-w-0">
           {esercizio.is_superset && (
-            <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold bg-rubber text-white pl-2 pr-2.5 py-1 rounded-full mb-2">
+            <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold bg-rubber text-white pl-2 pr-2.5 py-1 rounded-full mb-1.5">
               <Link2 className="w-3.5 h-3.5 text-tape" strokeWidth={2.5} />
               Superset col prossimo
             </span>
           )}
-          <h3 className="font-display font-bold text-[23px] leading-[1.05] tracking-tight break-words">
+          {esercizio.gruppo_muscolare && (
+            <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-steel mb-0.5">
+              <Piatto colore={coloreGruppo} size={12} />
+              {esercizio.gruppo_muscolare}
+            </p>
+          )}
+          <h3 className="font-display font-bold text-[20px] leading-[1.1] tracking-tight break-words">
             {esercizio.nome}
           </h3>
-          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1.5 text-sm">
-            {esercizio.gruppo_muscolare && (
-              <span className="inline-flex items-center gap-1.5 font-semibold text-steel">
-                <Piatto colore={coloreGruppo} size={14} />
-                {esercizio.gruppo_muscolare}
-              </span>
-            )}
-            {!isExpanded && sintesi && <span className="text-steel">{sintesi}</span>}
-          </div>
+          {!isExpanded && dati.length > 0 && (
+            <div className="inline-flex divide-x divide-line border border-line rounded-[8px] bg-white mt-2 overflow-hidden">
+              {dati.map(([valore, etichetta]) => (
+                <span key={etichetta} className="px-2.5 py-1 text-sm text-steel whitespace-nowrap">
+                  <span className="font-display font-bold text-[17px] text-rubber mr-1">{valore}</span>
+                  {etichetta}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         <ChevronDown
           className={`w-6 h-6 text-steel shrink-0 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
