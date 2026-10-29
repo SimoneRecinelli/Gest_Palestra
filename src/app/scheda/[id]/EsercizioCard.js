@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, Play, Pause, RotateCcw, ChevronDown, Info, Link2 } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
 import Piatto from '@/app/components/Piatto';
+import Anteprima from '@/app/components/Anteprima';
 import { COLORI_GRUPPO } from '@/app/components/gruppi';
 
 export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }) {
@@ -15,7 +16,6 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
 
   // Stato per l'apertura/chiusura della card (Fisarmonica)
   const [isExpanded, setIsExpanded] = useState(false); // Di default chiusa: la seduta si legge come lista compatta
-  const [anteprimaKo, setAnteprimaKo] = useState(false);
 
   // Ascolta i pulsanti "Espandi/Comprimi tutti"
   useEffect(() => {
@@ -114,13 +114,6 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
   const timerFinito = timeLeft === 0;
   const progressoTimer = tempoIniziale > 0 ? (timeLeft / tempoIniziale) * 100 : 0;
 
-  // Anteprima: la miniatura del video YouTube, se c'è. Altrimenti il disco del gruppo muscolare.
-  const idVideo = esercizio.video_url?.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/
-  )?.[1];
-  const urlAnteprima = idVideo ? `https://i.ytimg.com/vi/${idVideo}/mqdefault.jpg` : null;
-  const eShort = /\/shorts\//.test(esercizio.video_url || '');
-
   // Il programma in forma compatta, visibile quando la card è chiusa
   const dati = [
     [esercizio.serie, 'serie'],
@@ -141,26 +134,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
         aria-expanded={isExpanded}
         className="w-full flex items-center gap-3.5 pl-4 pr-3 py-3.5 min-h-[68px] text-left active:bg-white"
       >
-        <div className="relative w-[76px] h-[76px] shrink-0 rounded-[12px] overflow-hidden bg-chalk">
-          {urlAnteprima && !anteprimaKo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={urlAnteprima}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              onError={() => setAnteprimaKo(true)}
-              className={`w-full h-full object-cover ${eShort ? 'scale-[1.75]' : ''}`}
-            />
-          ) : (
-            <div
-              className="w-full h-full flex items-center justify-center"
-              style={{ backgroundColor: `${coloreGruppo}22` }}
-            >
-              <Piatto colore={coloreGruppo} size={34} />
-            </div>
-          )}
-        </div>
+        <Anteprima videoUrl={esercizio.video_url} colore={coloreGruppo} />
 
         <div className="flex-1 min-w-0">
           {esercizio.is_superset && (

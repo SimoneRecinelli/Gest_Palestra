@@ -1,11 +1,11 @@
 'use client';
-import { useState } from 'react';
+import useSwipeGiorni from '@/app/components/useSwipeGiorni';
 import ModificaEsercizio from './ModificaEsercizio';
 import AggiungiEsercizio from './AggiungiEsercizio';
 import RimuoviGiorno from './RimuoviGiorno';
 
 export default function ModificaSchedaClient({ giorni, scheda }) {
-  const [attivo, setAttivo] = useState(giorni[0]?.id ?? null);
+  const { attivo, vaiAl, classeAnimazione, gesti } = useSwipeGiorni(giorni);
   const giornoAttivo = giorni.find((g) => g.id === attivo);
 
   return (
@@ -21,9 +21,10 @@ export default function ModificaSchedaClient({ giorni, scheda }) {
           {giorni.map((g) => (
             <button
               key={g.id}
+              id={`seduta-${g.id}`}
               role="tab"
               aria-selected={g.id === attivo}
-              onClick={() => setAttivo(g.id)}
+              onClick={() => vaiAl(g.id)}
               className={`min-h-[44px] px-4 rounded-full font-semibold text-[15px] whitespace-nowrap transition-colors border ${
                 g.id === attivo
                   ? 'bg-rubber text-white border-rubber'
@@ -37,9 +38,11 @@ export default function ModificaSchedaClient({ giorni, scheda }) {
       </div>
 
       {giornoAttivo ? (
-        <div className="apri pt-1">
+        <div key={giornoAttivo.id} {...gesti} className={`touch-pan-y pt-1 min-h-[60vh] ${classeAnimazione}`}>
           <div className="flex justify-between items-center gap-3 mb-4">
-            <h2 className="font-display font-bold text-2xl tracking-tight">{giornoAttivo.nome}</h2>
+            <h2 className="font-display font-bold text-[22px] tracking-tight">
+              {giornoAttivo.esercizi.length} {giornoAttivo.esercizi.length === 1 ? 'esercizio' : 'esercizi'}
+            </h2>
             <RimuoviGiorno giornoId={giornoAttivo.id} nomeGiorno={giornoAttivo.nome} />
           </div>
 
