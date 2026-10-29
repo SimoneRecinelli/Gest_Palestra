@@ -143,7 +143,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
               Superset col prossimo
             </span>
           )}
-          <h3 className="font-display font-bold text-[27px] leading-[1.05] tracking-wide break-words">
+          <h3 className="font-display font-bold text-[23px] leading-[1.05] tracking-tight break-words">
             {esercizio.nome}
           </h3>
           <div className="flex items-center gap-x-3 gap-y-1 flex-wrap mt-1.5 text-sm">
@@ -171,7 +171,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
               [esercizio.recupero, 'recupero'],
             ].map(([valore, etichetta]) => (
               <div key={etichetta} className="text-center px-1">
-                <p className="font-display font-bold text-[40px] leading-none tracking-wide">
+                <p className="font-display font-bold text-[32px] leading-none tracking-tight">
                   {valore || '—'}
                 </p>
                 <p className="text-[13px] text-steel mt-1">{etichetta}</p>
@@ -216,8 +216,8 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
                   <li key={p.id} className="flex items-baseline justify-between py-2.5">
                     <span className={i === 0 ? 'text-rubber' : 'text-steel'}>
                       <span
-                        className={`font-display font-bold tracking-wide ${
-                          i === 0 ? 'text-[32px]' : 'text-[22px]'
+                        className={`font-display font-bold tracking-tight ${
+                          i === 0 ? 'text-[26px]' : 'text-[19px]'
                         }`}
                       >
                         {p.peso_kg ?? '—'}
@@ -278,7 +278,7 @@ export default function EsercizioCard({ esercizio, isAtleta, espansioneGlobale }
               <div className="flex items-center justify-between">
                 <div>
                   <p
-                    className={`font-display font-extrabold text-[64px] leading-none tracking-wide ${
+                    className={`font-display font-extrabold text-[50px] leading-none tracking-tight ${
                       timerFinito ? 'text-[#FF6A5C]' : ''
                     }`}
                     aria-label={`Recupero: ${formatTime(timeLeft)}`}

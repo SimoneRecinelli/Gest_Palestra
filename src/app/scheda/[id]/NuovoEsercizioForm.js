@@ -117,7 +117,7 @@ export default function NuovoEsercizioForm({ giornoId }) {
   return (
     <form onSubmit={handleSubmit} className="card p-5 mt-2 apri">
       <div className="flex items-center justify-between mb-4">
-        <h4 className="font-display font-bold text-2xl tracking-wide">Nuovo esercizio</h4>
+        <h4 className="font-display font-bold text-2xl tracking-tight">Nuovo esercizio</h4>
         <button
           type="button"
           onClick={() => setAperto(false)}

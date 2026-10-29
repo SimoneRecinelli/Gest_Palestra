@@ -1,12 +1,12 @@
-import { Big_Shoulders_Display, Hanken_Grotesk } from 'next/font/google';
+import { Archivo, Hanken_Grotesk } from 'next/font/google';
 import SessionWrapper from './SessionWrapper';
 import MainHeader from './MainHeader';
 import './globals.css';
 
-// Display: lettere strette da cartellonistica industriale, ottime per i numeri grandi.
-const display = Big_Shoulders_Display({
+// Display: grotesque largo e robusto, leggibile da lontano e senza lettere "in verticale".
+const display = Archivo({
   subsets: ['latin'],
-  weight: ['600', '700', '800'],
+  weight: ['700', '800'],
   variable: '--font-display',
   display: 'swap',
 });

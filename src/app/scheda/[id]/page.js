@@ -62,7 +62,7 @@ export default async function SchedaPage({ params }) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-5">
-      <h1 className="font-display font-extrabold text-[38px] leading-[1.02] tracking-wide break-words">
+      <h1 className="font-display font-extrabold text-[30px] leading-[1.02] tracking-tight break-words">
         {scheda.titolo}
       </h1>
 

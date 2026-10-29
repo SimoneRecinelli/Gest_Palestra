@@ -48,7 +48,7 @@ export default function MainHeader() {
         ) : (
           <Link href="/dashboard" className="flex items-center gap-2.5 min-h-tap pl-1.5">
             <Piatto colore="#D42B1E" size={22} foro="#15171A" />
-            <span className="font-display font-extrabold text-[22px] leading-none tracking-wide">
+            <span className="font-display font-extrabold text-[19px] leading-none tracking-tight">
               Palestra
             </span>
           </Link>

@@ -11,7 +11,7 @@ export default function ModificaSchedaClient({ giorni, scheda }) {
   return (
     <div className="max-w-3xl mx-auto px-4 pt-5">
       <p className="text-sm font-semibold text-steel">Modifica scheda</p>
-      <h1 className="font-display font-extrabold text-[38px] leading-[1.02] tracking-wide break-words">
+      <h1 className="font-display font-extrabold text-[30px] leading-[1.02] tracking-tight break-words">
         {scheda.titolo}
       </h1>
 
@@ -39,7 +39,7 @@ export default function ModificaSchedaClient({ giorni, scheda }) {
       {giornoAttivo ? (
         <div className="apri pt-1">
           <div className="flex justify-between items-center gap-3 mb-4">
-            <h2 className="font-display font-bold text-2xl tracking-wide">{giornoAttivo.nome}</h2>
+            <h2 className="font-display font-bold text-2xl tracking-tight">{giornoAttivo.nome}</h2>
             <RimuoviGiorno giornoId={giornoAttivo.id} nomeGiorno={giornoAttivo.nome} />
           </div>
 

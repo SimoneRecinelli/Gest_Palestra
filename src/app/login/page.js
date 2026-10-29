@@ -43,7 +43,7 @@ export default function LoginPage() {
             <circle cx="120" cy="120" r="36" fill="#FAFAF7" />
             <circle cx="120" cy="120" r="15" fill="#15171A" />
           </svg>
-          <h1 className="font-display font-extrabold text-[44px] leading-none tracking-wide mt-8">
+          <h1 className="font-display font-extrabold text-[33px] leading-none tracking-tight mt-8">
             Gestionale Palestra
           </h1>
           <p className="text-white/60 mt-2">Il diario della tua scheda</p>

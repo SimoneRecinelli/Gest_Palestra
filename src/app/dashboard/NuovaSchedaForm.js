@@ -41,7 +41,7 @@ export default function NuovaSchedaForm() {
   return (
     <form onSubmit={handleSubmit} className="card p-5 mt-5 apri">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-2xl tracking-wide">Nuova scheda</h2>
+        <h2 className="font-display font-bold text-2xl tracking-tight">Nuova scheda</h2>
         <button
           type="button"
           onClick={() => setAperto(false)}

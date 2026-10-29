@@ -26,7 +26,7 @@ export default async function Dashboard() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6">
-      <h1 className="font-display font-extrabold text-[40px] leading-none tracking-wide mb-6">
+      <h1 className="font-display font-extrabold text-[32px] leading-none tracking-tight mb-6">
         {isPt ? 'I tuoi atleti' : 'Le tue schede'}
       </h1>
 
@@ -49,7 +49,7 @@ export default async function Dashboard() {
               className="card flex items-center gap-4 pl-5 pr-4 py-5 min-h-[76px] active:bg-white active:border-rubber transition-colors"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-[28px] leading-[1.05] tracking-wide break-words">
+                <p className="font-display font-bold text-[23px] leading-[1.05] tracking-tight break-words">
                   {s.titolo}
                 </p>
                 {isPt && <p className="text-steel mt-1">{s.atleta_nome}</p>}
